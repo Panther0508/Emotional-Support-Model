@@ -1,0 +1,17 @@
+[
+    {
+        "user": "hello",
+        "ai": "I hear you \ud83d\udc42",
+        "emotion": "neutral"
+    },
+    {
+        "user": "how are you",
+        "ai": "I hear you \ud83d\udc42",
+        "emotion": "neutral"
+    },
+    {
+        "user": "fuck you",
+        "ai": "I'm here for you \ud83e\udd17 | Tip: Take a deep breath \ud83d\udc9b",
+        "emotion": "sad"
+    }
+]
