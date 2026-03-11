@@ -1,0 +1,10 @@
+# Force GitHub to detect these files as Python
+*.py linguist-language=Python
+*.json linguist-language=Python
+*.css linguist-language=CSS
+*.js linguist-language=JavaScript
+*.html linguist-language=HTML
+
+# Exclude large data files from language stats
+data/* linguist-vendored
+users/* linguist-vendored
