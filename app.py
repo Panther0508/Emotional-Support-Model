@@ -403,24 +403,27 @@ def forbidden(e):
     return render_template('error.html', error_code=403, message="Access forbidden"), 403
 
 
-# Initialize NLTK on startup
+# Initialize NLTK on startup - deferred to avoid blocking deployment
 def initialize_nltk():
-    """Initialize NLTK data on first run"""
+    """Initialize NLTK data on first run - called lazily"""
+    import nltk
+    import os
+    
+    # Set NLTK data path
+    nltk_data_path = os.path.join(os.path.expanduser('~'), 'nltk_data')
+    nltk.data.path.append(nltk_data_path)
+    
+    # Download required NLTK data
     try:
-        import nltk
-        # Download required NLTK data
-        nltk.download('punkt', quiet=True)
-        nltk.download('averaged_perceptron_tagger', quiet=True)
-        nltk.download('punkt_tab', quiet=True)
-        nltk.download('brown', quiet=True)
-        nltk.download('wordnet', quiet=True)
-        nltk.download('omw-1.4', quiet=True)
+        for resource in ['punkt', 'averaged_perceptron_tagger', 'punkt_tab', 'brown', 'wordnet', 'omw-1.4']:
+            try:
+                nltk.download(resource, quiet=True, download_dir=nltk_data_path)
+            except:
+                pass
     except Exception as e:
         print(f"NLTK initialization warning: {e}")
-        pass  # Continue even if NLTK fails
 
 
 if __name__ == '__main__':
-    initialize_nltk()
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
