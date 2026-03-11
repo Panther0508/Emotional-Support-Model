@@ -408,15 +408,19 @@ def initialize_nltk():
     """Initialize NLTK data on first run"""
     try:
         import nltk
+        # Download required NLTK data
         nltk.download('punkt', quiet=True)
         nltk.download('averaged_perceptron_tagger', quiet=True)
         nltk.download('punkt_tab', quiet=True)
         nltk.download('brown', quiet=True)
         nltk.download('wordnet', quiet=True)
-    except ImportError:
-        pass  # NLTK not available
+        nltk.download('omw-1.4', quiet=True)
+    except Exception as e:
+        print(f"NLTK initialization warning: {e}")
+        pass  # Continue even if NLTK fails
 
 
 if __name__ == '__main__':
     initialize_nltk()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)

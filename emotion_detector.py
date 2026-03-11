@@ -1,5 +1,8 @@
 # emotion_detector.py - Emotion Detection for Emotional Support AI
-from textblob import TextBlob
+try:
+    from textblob import TextBlob
+except ImportError:
+    TextBlob = None
 import re
 
 # Enhanced keyword mappings with weights for emotion detection
@@ -153,6 +156,8 @@ def detect_emotion(text):
     
     # Fallback to sentiment analysis
     try:
+        if TextBlob is None:
+            return "neutral"
         analysis = TextBlob(text)
         polarity = analysis.sentiment.polarity
         subjectivity = analysis.sentiment.subjectivity
