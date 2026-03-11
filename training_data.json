@@ -1,0 +1,110 @@
+{
+    "intents": [
+        {
+            "tag": "greeting",
+            "patterns": [
+                "hello",
+                "hi",
+                "hey",
+                "good morning",
+                "good evening"
+            ],
+            "responses": [
+                "Hello! How are you feeling today?",
+                "Hi there! What's on your mind?",
+                "Hey! I'm here to support you."
+            ]
+        },
+        {
+            "tag": "sadness",
+            "patterns": [
+                "I'm sad",
+                "feeling down",
+                "depressed",
+                "unhappy",
+                "miserable"
+            ],
+            "responses": [
+                "I'm here for you. Would you like to talk about what's making you feel this way?",
+                "It's okay to feel sad. Remember, this feeling is temporary."
+            ]
+        },
+        {
+            "tag": "anxiety",
+            "patterns": [
+                "anxious",
+                "worried",
+                "nervous",
+                "stressed",
+                "overwhelmed"
+            ],
+            "responses": [
+                "Take a deep breath. Let's work through this together.",
+                "Anxiety is tough, but you're stronger than you think."
+            ]
+        },
+        {
+            "tag": "anger",
+            "patterns": [
+                "angry",
+                "mad",
+                "frustrated",
+                "annoyed",
+                "furious"
+            ],
+            "responses": [
+                "It's natural to feel angry. Let's find a healthy way to process this.",
+                "I understand you're frustrated. Would you like to talk about it?"
+            ]
+        },
+        {
+            "tag": "happiness",
+            "patterns": [
+                "happy",
+                "excited",
+                "joyful",
+                "great",
+                "wonderful"
+            ],
+            "responses": [
+                "That's wonderful! I'd love to hear more about what made you happy!",
+                "Your positivity is contagious! What's bringing you joy?"
+            ]
+        },
+        {
+            "tag": "farewell",
+            "patterns": [
+                "bye",
+                "goodbye",
+                "see you",
+                "later"
+            ],
+            "responses": [
+                "Take care! Remember, I'm always here if you need to talk.",
+                "Goodbye! Hope to see you soon!"
+            ]
+        }
+    ],
+    "emotions": {
+        "positive": [
+            "happy",
+            "excited",
+            "joyful",
+            "grateful",
+            "peaceful"
+        ],
+        "negative": [
+            "sad",
+            "anxious",
+            "angry",
+            "frustrated",
+            "lonely"
+        ],
+        "neutral": [
+            "okay",
+            "fine",
+            "meh",
+            "neutral"
+        ]
+    }
+}

@@ -1,14 +1,25 @@
 {
   "sad": [
-    "Take a deep breath 💛",
-    "Go for a short walk 🚶",
-    "Write down what you feel ✍️"
+    "Take a deep breath",
+    "Go for a short walk",
+    "Write down what you feel"
   ],
   "anxious": [
-    "Try meditation 🧘",
-    "Focus on 5 things around you 👀",
-    "Talk to someone you trust 💬"
+    "Try meditation",
+    "Focus on 5 things around you",
+    "Talk to someone you trust"
   ],
-  "angry": ["Count to 10 😤", "Listen to calming music 🎵", "Take a break 🛋️"],
-  "neutral": ["Keep reflecting 🤔", "Take a small break ☕"]
+  "angry": [
+    "Count to 10",
+    "Listen to calming music",
+    "Take a break"
+  ],
+  "neutral": [
+    "Keep reflecting",
+    "Take a small break"
+  ],
+  "happy": [
+    "Share your happiness with others",
+    "Take a moment to savor this feeling"
+  ]
 }
