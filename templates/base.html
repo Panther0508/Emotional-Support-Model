@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Emotional Support AI 💛{% endblock %}</title>
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
+
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="navbar">
@@ -26,13 +29,13 @@
                 <i class="fas fa-heart"></i>
                 <span>Emotional Support AI</span>
             </a>
-            
+
             <div class="nav-toggle" id="navToggle">
                 <span></span>
                 <span></span>
                 <span></span>
             </div>
-            
+
             <ul class="nav-menu" id="navMenu">
                 <li class="nav-item">
                     <a href="{{ url_for('index') }}" class="nav-link">
@@ -94,12 +97,368 @@
         </div>
     </footer>
 
+    <!-- Disclaimer Modal -->
+    <div id="disclaimerModal" class="disclaimer-modal" style="display: none;">
+        <div class="disclaimer-modal-content">
+            <div class="disclaimer-modal-header">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h2>⚠️ Important Disclaimer</h2>
+            </div>
+
+            <div class="disclaimer-modal-body">
+                <div class="disclaimer-content">
+                    <h3><i class="fas fa-heart"></i> Mental Health Disclaimer</h3>
+                    <p>This AI companion is designed to provide <strong>emotional support only</strong> and is
+                        <strong>NOT</strong> a substitute for professional mental health care.
+                    </p>
+                    <ul>
+                        <li><i class="fas fa-times-circle"></i> This is NOT a medical device</li>
+                        <li><i class="fas fa-times-circle"></i> AI responses are NOT professional advice</li>
+                        <li><i class="fas fa-times-circle"></i> If you're in crisis, please seek immediate help</li>
+                    </ul>
+                </div>
+
+                <div class="api-notice">
+                    <h3><i class="fas fa-robot"></i> AI API Usage Notice</h3>
+                    <p>This application uses external AI services. By proceeding, you acknowledge:</p>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> Your messages may be transmitted to Google AI and/or
+                            Hugging Face</li>
+                        <li><i class="fas fa-check-circle"></i> Review their privacy policies for data handling</li>
+                        <li><i class="fas fa-check-circle"></i> API usage may incur costs based on your plan</li>
+                    </ul>
+                </div>
+
+                <div class="timer-section">
+                    <h4>Auto-redirect in: <span id="modalTimer">10</span>s</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="modalProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button class="btn-accept" id="modalAcceptBtn" onclick="acceptDisclaimerModal()">
+                        <i class="fas fa-check"></i> I Understand & Accept
+                    </button>
+                </div>
+
+                <div class="crisis-info">
+                    <p><strong>Need immediate help?</strong></p>
+                    <p>
+                        <a href="tel:988">988</a> |
+                        <a href="tel:741741">741741</a> |
+                        <a href="https://findahelpline.com" target="_blank">Find a Helpline</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .disclaimer-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .disclaimer-modal-content {
+            background: var(--darker, #16213e);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .disclaimer-modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .disclaimer-modal-header .warning-icon {
+            font-size: 40px;
+            color: var(--secondary, #FF6B6B);
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        .disclaimer-modal-header h2 {
+            color: var(--secondary, #FF6B6B);
+            font-size: 24px;
+        }
+
+        .disclaimer-modal-body .disclaimer-content,
+        .disclaimer-modal-body .api-notice {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 4px solid var(--secondary, #FF6B6B);
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 15px;
+        }
+
+        .disclaimer-modal-body .api-notice {
+            background: rgba(108, 99, 255, 0.1);
+            border-left-color: var(--primary, #6C63FF);
+        }
+
+        .disclaimer-modal-body h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: var(--secondary, #FF6B6B);
+        }
+
+        .disclaimer-modal-body .api-notice h3 {
+            color: var(--primary, #6C63FF);
+        }
+
+        .disclaimer-modal-body p,
+        .disclaimer-modal-body li {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text, #e0e0e0);
+        }
+
+        .disclaimer-modal-body ul {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 10px;
+        }
+
+        .disclaimer-modal-body li {
+            margin-bottom: 5px;
+        }
+
+        .disclaimer-modal-body li i {
+            margin-right: 8px;
+            color: var(--primary, #6C63FF);
+        }
+
+        .disclaimer-modal-body .timer-section {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .disclaimer-modal-body .timer-section h4 {
+            color: var(--text-muted, #a0a0a0);
+            margin-bottom: 10px;
+        }
+
+        .disclaimer-modal-body #modalTimer {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary, #6C63FF);
+        }
+
+        .disclaimer-modal-body .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .disclaimer-modal-body .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary, #FF6B6B), var(--primary, #6C63FF));
+            border-radius: 2px;
+            transition: width 1s linear;
+        }
+
+        .disclaimer-modal-body .button-container {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .disclaimer-modal-body .btn-accept {
+            background: linear-gradient(135deg, var(--primary, #6C63FF) 0%, #5a52d5 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .disclaimer-modal-body .btn-accept:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        .disclaimer-modal-body .crisis-info {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .disclaimer-modal-body .crisis-info a {
+            color: var(--secondary, #FF6B6B);
+            text-decoration: none;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+    </style>
+
+    <script>
+        // Disclaimer modal functionality
+        (function () {
+            const modal = document.getElementById('disclaimerModal');
+            const modalTimer = document.getElementById('modalTimer');
+            const modalProgress = document.getElementById('modalProgress');
+            const modalAcceptBtn = document.getElementById('modalAcceptBtn');
+
+            let remainingTime = 10;
+            let countdown = null;
+            let isNavigating = false;
+
+            // Check if disclaimer should be shown
+            function checkDisclaimer() {
+                // Only show on main pages (index, chat)
+                const currentPath = window.location.pathname;
+                if (currentPath !== '/' && currentPath !== '/chat' && currentPath !== '/index') {
+                    return;
+                }
+
+                // Check session storage first (client-side)
+                const accepted = sessionStorage.getItem('disclaimer_accepted');
+                const timestamp = sessionStorage.getItem('disclaimer_timestamp');
+
+                if (accepted === 'true' && timestamp) {
+                    const elapsed = (Date.now() - parseInt(timestamp)) / 1000;
+                    if (elapsed < 10) {
+                        // Still within 10 seconds, show modal
+                        remainingTime = Math.ceil(10 - elapsed);
+                        showModal();
+                    }
+                    // After 10 seconds, don't show
+                    return;
+                }
+
+                // If not accepted, show modal
+                remainingTime = 10;
+                showModal();
+            }
+
+            function showModal() {
+                if (modal) {
+                    modal.style.display = 'flex';
+                    updateTimerDisplay();
+                    startCountdown();
+                }
+            }
+
+            function hideModal() {
+                if (modal) {
+                    modal.style.display = 'none';
+                    clearInterval(countdown);
+                }
+            }
+
+            function startCountdown() {
+                clearInterval(countdown);
+                countdown = setInterval(() => {
+                    if (isNavigating) {
+                        clearInterval(countdown);
+                        return;
+                    }
+
+                    remainingTime--;
+                    updateTimerDisplay();
+
+                    if (remainingTime <= 0) {
+                        clearInterval(countdown);
+                        // Auto-accept and close
+                        acceptDisclaimerModal();
+                    }
+                }, 1000);
+            }
+
+            function updateTimerDisplay() {
+                if (modalTimer) modalTimer.textContent = remainingTime;
+                if (modalProgress) {
+                    const progress = ((10 - remainingTime) / 10) * 100;
+                    modalProgress.style.width = progress + '%';
+                }
+            }
+
+            window.acceptDisclaimerModal = function () {
+                if (isNavigating) return;
+                isNavigating = true;
+
+                if (modalAcceptBtn) {
+                    modalAcceptBtn.disabled = true;
+                    modalAcceptBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Accepting...';
+                }
+
+                // Accept via API
+                fetch('/accept-disclaimer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Store in session
+                        sessionStorage.setItem('disclaimer_accepted', 'true');
+                        sessionStorage.setItem('disclaimer_timestamp', Date.now().toString());
+                        hideModal();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Still close modal on error
+                        sessionStorage.setItem('disclaimer_accepted', 'true');
+                        sessionStorage.setItem('disclaimer_timestamp', Date.now().toString());
+                        hideModal();
+                    });
+            };
+
+            // Initialize on page load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', checkDisclaimer);
+            } else {
+                checkDisclaimer();
+            }
+        })();
+    </script>
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    
+
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

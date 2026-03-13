@@ -130,24 +130,6 @@ def validate_personality(personality):
 def index():
     """Main landing page"""
     stats = load_statistics()
-    
-    # Check if disclaimer has been accepted
-    disclaimer_accepted = session.get('disclaimer_accepted', False)
-    disclaimer_timestamp = session.get('disclaimer_timestamp', 0)
-    
-    # If not accepted or not enough time has passed, show disclaimer
-    if not disclaimer_accepted:
-        return render_template('disclaimer.html', stats=stats)
-    
-    # Check if 10 seconds have passed since disclaimer was shown
-    import time
-    current_time = time.time()
-    time_elapsed = current_time - disclaimer_timestamp if disclaimer_timestamp > 0 else 0
-    
-    if time_elapsed < 10:
-        remaining_time = 10 - int(time_elapsed)
-        return render_template('disclaimer.html', stats=stats, remaining_time=remaining_time)
-    
     return render_template('index.html', stats=stats)
 
 
@@ -194,21 +176,6 @@ from flask_login import login_required, current_user
 @login_required
 def chat():
     """Chat interface page"""
-    # Check disclaimer acceptance before allowing chat access
-    import time
-    disclaimer_accepted = session.get('disclaimer_accepted', False)
-    disclaimer_timestamp = session.get('disclaimer_timestamp', 0)
-    
-    if not disclaimer_accepted:
-        return render_template('disclaimer.html', stats=load_statistics())
-    
-    current_time = time.time()
-    time_elapsed = current_time - disclaimer_timestamp if disclaimer_timestamp > 0 else 0
-    
-    if time_elapsed < 10:
-        remaining_time = 10 - int(time_elapsed)
-        return render_template('disclaimer.html', stats=load_statistics(), remaining_time=remaining_time)
-    
     username = current_user.username
     personality = session.get('personality', Config.DEFAULT_PERSONALITY)
     
