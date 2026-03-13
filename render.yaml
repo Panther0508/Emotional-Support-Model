@@ -2,15 +2,29 @@ services:
   - type: web
     name: emotional-support-chatbot
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:app --timeout 120
+    buildCommand: pip install -r requirements.txt && python -c "import nltk; nltk.download('punkt'); nltk.download('averaged_perceptron_tagger'); nltk.download('punkt_tab')"
+    startCommand: gunicorn wsgi:app --timeout 120 --workers 2 --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
+      - key: FLASK_ENV
+        value: production
       - key: SECRET_KEY
         generateValue: true
+      - key: DATABASE_URL
+        sync: false
       - key: HF_TOKEN
         sync: false
       - key: GOOGLE_TOKEN
         sync: false
+      - key: NLTK_DATA
+        value: /tmp/nltk_data
     autoDeploy: true
+    healthCheckPath: /
+    plan: free
+
+databases:
+  - name: emotional_support_db
+    databaseName: emotional_support
+    user: emotional_support
+    # Password will be generated and shown after creation

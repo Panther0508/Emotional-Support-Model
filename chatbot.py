@@ -330,12 +330,12 @@ def get_personalities():
 def get_personality_description(personality):
     """Get description of a personality"""
     descriptions = {
-        "empathetic": "理解和同理的对话方式，耐心倾听你的感受",
-        "funny": "轻松幽默的对话方式，用笑声化解负面情绪",
-        "motivational": "激励人心的对话方式，鼓励你克服困难",
-        "calm": "平静温和的对话方式，帮助你放松心情"
+        "empathetic": "Understanding and empathetic conversation style, listening patiently to your feelings.",
+        "funny": "Light-hearted and humorous conversation style, using laughter to ease negative emotions.",
+        "motivational": "Inspirational and encouraging conversation style, helping you overcome challenges.",
+        "calm": "Peaceful and gentle conversation style, helping you relax and find tranquility."
     }
-    return descriptions.get(personality, "默认的对话方式")
+    return descriptions.get(personality, "A supportive conversation style.")
 
 
 def get_personality_info():

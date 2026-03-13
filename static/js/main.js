@@ -381,3 +381,175 @@ window.scrollToElement = scrollToElement;
 window.scrollToTop = scrollToTop;
 window.copyToClipboard = copyToClipboard;
 window.isInViewport = isInViewport;
+
+/* ==========================================================================
+   Disclaimer Modal Logic
+   ========================================================================== */
+window.initDisclaimer = function () {
+    const modal = document.getElementById('disclaimerModal');
+    const modalTimer = document.getElementById('modalTimer');
+    const modalProgress = document.getElementById('modalProgress');
+    const modalAcceptBtn = document.getElementById('modalAcceptBtn');
+
+    let remainingTime = 10;
+    let countdown = null;
+    let isNavigating = false;
+
+    function checkDisclaimer() {
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/' && currentPath !== '/chat' && currentPath !== '/index') {
+            return;
+        }
+
+        const accepted = sessionStorage.getItem('disclaimer_accepted');
+        const timestamp = sessionStorage.getItem('disclaimer_timestamp');
+
+        if (accepted === 'true' && timestamp) {
+            const elapsed = (Date.now() - parseInt(timestamp)) / 1000;
+            if (elapsed < 10) {
+                remainingTime = Math.ceil(10 - elapsed);
+                showModal();
+            }
+            return;
+        }
+
+        remainingTime = 10;
+        showModal();
+    }
+
+    function showModal() {
+        if (modal) {
+            modal.style.display = 'flex';
+            updateTimerDisplay();
+            startCountdown();
+        }
+    }
+
+    function hideModal() {
+        if (modal) {
+            modal.style.display = 'none';
+            clearInterval(countdown);
+        }
+    }
+
+    function startCountdown() {
+        clearInterval(countdown);
+        countdown = setInterval(() => {
+            if (isNavigating) {
+                clearInterval(countdown);
+                return;
+            }
+
+            remainingTime--;
+            updateTimerDisplay();
+
+            if (remainingTime <= 0) {
+                clearInterval(countdown);
+                window.acceptDisclaimerModal();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        if (modalTimer) modalTimer.textContent = remainingTime;
+        if (modalProgress) {
+            const progress = ((10 - remainingTime) / 10) * 100;
+            modalProgress.style.width = progress + '%';
+        }
+    }
+
+    window.acceptDisclaimerModal = function () {
+        if (isNavigating) return;
+        isNavigating = true;
+
+        if (modalAcceptBtn) {
+            modalAcceptBtn.disabled = true;
+            modalAcceptBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Accepting...';
+        }
+
+        fetch('/accept-disclaimer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(response => response.json())
+            .then(data => {
+                sessionStorage.setItem('disclaimer_accepted', 'true');
+                sessionStorage.setItem('disclaimer_timestamp', Date.now().toString());
+                hideModal();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                sessionStorage.setItem('disclaimer_accepted', 'true');
+                sessionStorage.setItem('disclaimer_timestamp', Date.now().toString());
+                hideModal();
+            });
+    };
+
+    checkDisclaimer();
+};
+
+/* ==========================================================================
+   Home Page Statistics Logic
+   ========================================================================== */
+window.initHomeStats = function (emotionData, totalConversations) {
+    function renderEmotionChart() {
+        const container = document.getElementById('emotionChart');
+        if (!container || !emotionData) return;
+
+        const colors = {
+            'happy': '#4CAF50',
+            'sad': '#2196F3',
+            'anxious': '#FF9800',
+            'angry': '#F44336',
+            'neutral': '#9E9E9E'
+        };
+
+        let html = '';
+        for (const [emotion, count] of Object.entries(emotionData)) {
+            const percentage = totalConversations > 0 ? Math.round((count / totalConversations) * 100) : 0;
+            html += `
+                <div class="emotion-bar animate-fade-in" style="margin-bottom: 1.5rem;">
+                    <div class="d-flex justify-between mb-2 small text-uppercase tracking-wider">
+                        <span class="color-${emotion}">${emotion}</span>
+                        <span class="text-muted">${percentage}%</span>
+                    </div>
+                    <div class="bar-container glass-panel" style="height: 10px; border-radius: 5px; overflow: hidden; background: rgba(255, 255, 255, 0.05);">
+                        <div class="bar neon-glow bg-${emotion}" style="width: ${percentage}%; height: 100%; transition: width 1s ease-out;"></div>
+                    </div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    function animateCounters() {
+        const counters = document.querySelectorAll('.stat-number[data-count]');
+
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-count')) || 0;
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+
+            const updateCounter = () => {
+                current += step;
+                if (current < target) {
+                    counter.textContent = Math.floor(current);
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    counter.textContent = target;
+                }
+            };
+
+            updateCounter();
+        });
+    }
+
+    animateCounters();
+    renderEmotionChart();
+};
+
+window.scrollToFeatures = function() {
+    const el = document.getElementById('features');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+};

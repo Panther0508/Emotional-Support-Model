@@ -1,220 +1,117 @@
 {% extends "base.html" %}
 
-{% block head %}
-<style>
-    /* Dashboard specific styles */
-    .dashboard-container {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem 0;
-    }
-
-    @media (min-width: 900px) {
-        .dashboard-container {
-            grid-template-columns: 2fr 1fr;
-        }
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        padding: 2rem;
-        text-align: center;
-        background: var(--glass-bg);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--border-radius);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-5px);
-        border-color: rgba(0, 255, 255, 0.4);
-        box-shadow: 0 10px 30px rgba(0, 255, 255, 0.1);
-    }
-
-    .stat-value {
-        font-size: 3rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: var(--text-color);
-        text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    }
-
-    .stat-label {
-        font-size: 1rem;
-        color: var(--text-light);
-        text-transform: uppercase;
-        letter-spacing: 2px;
-    }
-
-    .emotion-chart {
-        display: flex;
-        height: 200px;
-        align-items: flex-end;
-        gap: 10px;
-        padding: 20px 0;
-        margin-top: 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .emotion-bar-container {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        height: 100%;
-        justify-content: flex-end;
-    }
-
-    .emotion-bar {
-        width: 100%;
-        max-width: 50px;
-        border-radius: 4px 4px 0 0;
-        transition: height 1s ease-out;
-        box-shadow: 0 0 15px currentColor;
-    }
-
-    .emotion-label {
-        margin-top: 10px;
-        font-size: 0.8rem;
-        color: var(--text-light);
-        text-transform: capitalize;
-    }
-
-    .emotion-value {
-        margin-bottom: 5px;
-        font-size: 0.8rem;
-        font-weight: bold;
-    }
-
-    .recent-activity {
-        max-height: 500px;
-        overflow-y: auto;
-        padding-right: 10px;
-    }
-
-    .activity-item {
-        padding: 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        display: flex;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .activity-item:last-child {
-        border-bottom: none;
-    }
-
-    .activity-icon {
-        font-size: 1.5rem;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 10px;
-        border-radius: 50%;
-    }
-
-    .activity-content {
-        flex: 1;
-    }
-
-    .activity-time {
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        margin-bottom: 0.25rem;
-    }
-
-    .activity-text {
-        font-size: 0.95rem;
-        line-height: 1.4;
-    }
-</style>
-{% endblock %}
+{% block title %}Dashboard - Emotional Support AI{% endblock %}
 
 {% block content %}
-<div class="dashboard-container animate-fade-in">
-    <!-- Main Dashboard Area -->
-    <div class="dashboard-main">
-        <h1 class="mb-4">Welcome back, {{ username }}</h1>
-        <p class="text-light mb-4">Here's an overview of your emotional journey.</p>
+<div class="container py-5 animate-fade-in">
+    <!-- Header -->
+    <div class="dashboard-header mb-5 text-center">
+        <h1 class="neon-text mb-2">Welcome back, {{ username }}</h1>
+        <p class="text-secondary">Here's an overview of your emotional journey and recent activity.</p>
+    </div>
 
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value">{{ total_conversations }}</div>
-                <div class="stat-label">Conversations</div>
+    <!-- Stats Grid -->
+    <div class="dashboard-grid mb-5">
+        <div class="glass-card p-4 text-center floating">
+            <div class="stat-value neon-text h1 mb-1">{{ total_conversations }}</div>
+            <div class="stat-label small text-muted text-uppercase tracking-wider">Total Conversations</div>
+            <i class="fas fa-comments fs-4 mt-3 text-info" style="opacity: 0.5;"></i>
+        </div>
+        
+        <div class="glass-card p-4 text-center floating color-{{ dominant_emotion }}" style="animation-delay: 0.2s;">
+            <div class="stat-value h1 mb-1">
+                {{ dominant_emotion | emotion_emoji }}
             </div>
-            <div class="stat-card">
-                <div class="stat-value" style="color: {{ dominant_emotion | emotion_color }}">{{ dominant_emotion | emotion_emoji }}</div>
-                <div class="stat-label">Dominant Emotion</div>
-            </div>
+            <div class="stat-label small text-muted text-uppercase tracking-wider">Dominant Emotion</div>
+            <div class="neon-text small mt-2">{{ dominant_emotion | capitalize }}</div>
         </div>
 
-        <!-- Emotion Distribution Chart -->
-        <div class="card p-4 mb-4 glass-panel">
-            <h3 class="mb-3">Emotion Distribution</h3>
-            {% if total_conversations > 0 %}
-            <div class="emotion-chart">
-                {% for emotion, count in emotions.items() %}
-                {% set percentage = (count / total_conversations * 100) if total_conversations > 0 else 0 %}
-                <div class="emotion-bar-container">
-                    <div class="emotion-value">{{ percentage | round | int }}%</div>
-                    <div class="emotion-bar" style="height: {{ percentage }}%; background-color: {{ emotion | emotion_color }}; color: {{ emotion | emotion_color }};"></div>
-                    <div class="emotion-label">{{ emotion }}</div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="text-center p-5 text-muted">
-                <i class="fas fa-chart-bar fs-1 mb-3"></i>
-                <p>Start chatting to build your emotional profile!</p>
-                <a href="{{ url_for('chat') }}" class="btn btn-primary mt-3">Start Chatting</a>
-            </div>
-            {% endif %}
+        <div class="glass-card p-4 text-center floating" style="animation-delay: 0.4s;">
+            <div class="stat-value neon-text h1 mb-1">{{ active_days if active_days is defined else 1 }}</div>
+            <div class="stat-label small text-muted text-uppercase tracking-wider">Days Active</div>
+            <i class="fas fa-calendar-alt fs-4 mt-3 text-warning" style="opacity: 0.5;"></i>
         </div>
     </div>
 
-    <!-- Sidebar / Recent Activity -->
-    <div class="dashboard-sidebar">
-        <div class="card p-4 glass-panel h-100">
-            <h3 class="mb-4 d-flex justify-content-between align-items-center">
-                Recent Activity
-                <a href="{{ url_for('history') }}" class="btn btn-sm btn-outline-primary">View All</a>
-            </h3>
-
-            {% if recent_history %}
-            <div class="recent-activity custom-scrollbar">
-                {% for msg in recent_history %}
-                <div class="activity-item">
-                    <div class="activity-icon" style="color: {{ msg.emotion | emotion_color if msg.sender == 'user' else '#00f2fe' }}">
-                        {% if msg.sender == 'user' %}
-                        {{ msg.emotion | emotion_emoji }}
-                        {% else %}
-                        <i class="fas fa-robot"></i>
-                        {% endif %}
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-time">{{ msg.timestamp }}</div>
-                        <div class="activity-text text-truncate-2" style="max-height: 2.8em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                            {{ msg.text }}
+    <div class="row align-stretch">
+        <!-- Main Chart Area -->
+        <div class="col-lg-8 mb-4">
+            <div class="glass-panel p-4 h-100">
+                <h3 class="h5 mb-4 neon-text"><i class="fas fa-chart-pie me-2"></i> Emotional Distribution</h3>
+                {% if total_conversations > 0 %}
+                    <div class="emotion-distribution-container py-4">
+                        {% for emotion, count in emotions.items() %}
+                        {% set percentage = (count / total_conversations * 100) if total_conversations > 0 else 0 %}
+                        <div class="mb-4">
+                            <div class="d-flex justify-between mb-2">
+                                <span class="small text-primary font-weight-bold">{{ emotion | capitalize }}</span>
+                                <span class="small text-muted">{{ percentage | round | int }}%</span>
+                            </div>
+                            <div class="progress-bar" style="height: 10px;">
+                                <div class="progress-fill neon-glow bg-{{ emotion }} progress-bar-{{ loop.index }}"></div>
+                            </div>
                         </div>
+                        {% endfor %}
                     </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-chart-bar fs-1 mb-3 text-muted"></i>
+                        <p class="text-secondary">Start chatting to build your emotional profile!</p>
+                        <a href="{{ url_for('chat') }}" class="btn btn-primary mt-3">Start Chatting</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Activity Sidebar -->
+        <div class="col-lg-4 mb-4">
+            <div class="glass-panel p-4 h-100">
+                <div class="d-flex justify-between align-center mb-4">
+                    <h3 class="h5 m-0 neon-text"><i class="fas fa-history me-2"></i> Activity</h3>
+                    <a href="{{ url_for('history') }}" class="btn btn-sm btn-glass">View All</a>
                 </div>
-                {% endfor %}
+
+                <div class="recent-activity timeline" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                    {% if recent_history %}
+                        {% for msg in recent_history %}
+                        <div class="timeline-item mb-4">
+                            <div class="small text-muted mb-1">{{ msg.timestamp[:19]|replace('T', ' ') }}</div>
+                            <div class="glass-card p-3 small text-primary" style="background: rgba(255, 255, 255, 0.03);">
+                                {{ msg.ai }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4 text-muted small">
+                            No recent activity found.
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-            {% else %}
-            <div class="text-center p-4 text-muted">
-                <p>No recent activity.</p>
-            </div>
-            {% endif %}
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tracking-wider { letter-spacing: 0.1em; }
+    .justify-between { justify-content: space-between; }
+    .d-flex.align-stretch { align-items: stretch; }
+    
+    /* Responsive adjustment for row */
+    .row { display: flex; flex-wrap: wrap; margin-left: -1rem; margin-right: -1rem; }
+    .col-lg-8 { flex: 0 0 66.666667%; padding: 1rem; }
+    .col-lg-4 { flex: 0 0 33.333333%; padding: 1rem; }
+    
+    @media (max-width: 992px) {
+        .col-lg-8, .col-lg-4 { flex: 0 0 100%; }
+    }
+
+    {% if total_conversations > 0 %}
+    {% for emotion, count in emotions.items() %}
+    .progress-bar-{{ loop.index }} { width: {{ (count / total_conversations * 100) }}%; }
+    {% endfor %}
+    {% endif %}
+</style>
 {% endblock %}

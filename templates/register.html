@@ -3,18 +3,19 @@
 {% block title %}Sign Up - Emotional Support AI 💛{% endblock %}
 
 {% block content %}
-<div class="auth-page">
-    <div class="auth-container">
+<div class="auth-page container">
+    <div class="auth-panel floating">
         <div class="auth-header">
-            <i class="fas fa-heart"></i>
-            <h2>Join Us</h2>
+            <i class="fas fa-heart neon-glow" style="padding: 1rem; border-radius: 50%;"></i>
+            <h2 class="neon-text">Join Us</h2>
             <p class="auth-subtitle">Create an account to track your emotional journey</p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="auth-alert alert-{{ category }}">
+                    <div class="notification notification-{{ category }} show" style="position: relative; bottom: 0; right: 0; margin-bottom: 1.5rem; transform: none; opacity: 1;">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
                         {{ message }}
                     </div>
                 {% endfor %}
@@ -22,35 +23,35 @@
         {% endwith %}
 
         <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form" id="registerForm">
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label for="username">
                     <i class="fas fa-user"></i> Choose Username
                 </label>
                 <input type="text" id="username" name="username" placeholder="3-30 characters" required minlength="3" maxlength="30" autocomplete="username">
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label for="password">
                     <i class="fas fa-lock"></i> Create Password
                 </label>
                 <input type="password" id="password" name="password" placeholder="Must be at least 6 characters" required minlength="6" autocomplete="new-password">
             </div>
             
-            <div class="form-group">
+            <div class="form-group mb-4">
                 <label for="confirm_password">
                     <i class="fas fa-check-circle"></i> Confirm Password
                 </label>
                 <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat your password" required minlength="6" autocomplete="new-password">
-                <small id="passwordError" style="color: var(--error); display: none; margin-top: 5px;">Passwords do not match</small>
+                <small id="passwordError" class="neon-text mt-2 d-none">Passwords do not match</small>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+            <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn">
                 <i class="fas fa-user-plus"></i> Create Account
             </button>
         </form>
 
-        <div class="auth-footer">
-            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Log in here</a></p>
+        <div class="auth-footer mt-4">
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}" class="neon-text">Log in here</a></p>
         </div>
     </div>
 </div>
@@ -66,10 +67,10 @@
 
         function validatePassword() {
             if(p1.value !== p2.value && p2.value !== '') {
-                error.style.display = 'block';
+                error.classList.remove('d-none');
                 p2.style.borderColor = 'var(--error)';
             } else {
-                error.style.display = 'none';
+                error.classList.add('d-none');
                 if(p2.value !== '') {
                     p2.style.borderColor = 'var(--success)';
                 } else {
@@ -84,7 +85,7 @@
         form.addEventListener('submit', function(e) {
             if(p1.value !== p2.value) {
                 e.preventDefault();
-                error.style.display = 'block';
+                error.classList.remove('d-none');
                 p2.style.borderColor = 'var(--error)';
             }
         });
@@ -92,133 +93,4 @@
 </script>
 {% endblock %}
 
-{% block extra_css %}
-<!-- Reusing styles from login.html for consistency -->
-<style>
-    .auth-page {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: calc(100vh - 160px);
-        padding: 2rem;
-        background: radial-gradient(circle at center, rgba(255, 193, 7, 0.05) 0%, transparent 70%);
-    }
-
-    .auth-container {
-        background: rgba(22, 33, 62, 0.6);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-radius: var(--radius-xl);
-        padding: 3rem;
-        max-width: 450px;
-        width: 100%;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        animation: fadeUp 0.5s ease-out;
-    }
-
-    @keyframes fadeUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .auth-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .auth-header i {
-        font-size: 3rem;
-        color: var(--accent);
-        margin-bottom: 1rem;
-        filter: drop-shadow(0 0 10px rgba(255, 193, 7, 0.5));
-    }
-
-    .auth-header h2 {
-        font-size: 1.75rem;
-        color: var(--text-primary);
-    }
-
-    .auth-subtitle {
-        color: var(--text-secondary);
-        margin-top: 0.5rem;
-        font-size: 0.95rem;
-    }
-    
-    .auth-alert {
-        padding: 1rem;
-        border-radius: var(--radius-md);
-        margin-bottom: 1.5rem;
-        font-size: 0.9rem;
-        text-align: center;
-        border: 1px solid transparent;
-    }
-    
-    .alert-error {
-        background: rgba(244, 67, 54, 0.1);
-        border-color: rgba(244, 67, 54, 0.3);
-        color: var(--error);
-    }
-    
-    .alert-success {
-        background: rgba(76, 175, 80, 0.1);
-        border-color: rgba(76, 175, 80, 0.3);
-        color: var(--success);
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        color: var(--text-primary);
-    }
-
-    .form-group label i {
-        margin-right: 0.5rem;
-        color: var(--accent);
-    }
-
-    .form-group input {
-        width: 100%;
-        padding: 1rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: var(--radius-md);
-        background: rgba(15, 15, 35, 0.7);
-        color: var(--text-primary);
-        font-size: 1rem;
-        transition: all var(--transition-normal);
-    }
-
-    .form-group input:focus {
-        outline: none;
-        border-color: var(--accent);
-        box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
-    }
-
-    .btn-block {
-        width: 100%;
-        margin-top: 1rem;
-    }
-
-    .auth-footer {
-        text-align: center;
-        margin-top: 2rem;
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-    }
-
-    .auth-footer a {
-        font-weight: 600;
-    }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}

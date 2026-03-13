@@ -3,73 +3,33 @@
 {% block title %}Error {{ error_code }} - Emotional Support AI{% endblock %}
 
 {% block content %}
-<div class="error-page">
-    <div class="error-content">
-        <div class="error-code">{{ error_code }}</div>
-        <h1>Oops! Something went wrong</h1>
-        <p>{{ message }}</p>
+<div class="auth-page container">
+    <div class="auth-panel floating text-center">
+        <div class="error-illustration mb-4">
+            <i class="fas fa-robot neon-text" style="font-size: 5rem; opacity: 0.8;"></i>
+        </div>
+        
+        <div class="error-code neon-text mb-3" style="font-size: 6rem; font-weight: 800; line-height: 1;">
+            {{ error_code }}
+        </div>
+        
+        <h1 class="h3 mb-3">Oops! Something went wrong</h1>
+        <p class="text-secondary mb-5">{{ message }}</p>
 
-        <div class="error-actions">
+        <div class="error-actions d-flex gap-3 justify-center flex-wrap">
             <a href="{{ url_for('index') }}" class="btn btn-primary">
-                <i class="fas fa-home"></i> Go Home
+                <i class="fas fa-home me-2"></i> Go Home
             </a>
             <a href="{{ url_for('chat') }}" class="btn btn-outline">
-                <i class="fas fa-comments"></i> Start Chat
+                <i class="fas fa-comments me-2"></i> Try Chatting
             </a>
         </div>
 
-        <div class="error-illustration">
-            <i class="fas fa-robot"></i>
+        <div class="mt-5 small text-muted">
+            If this persists, please contact support or try again later.
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-    .error-page {
-        min-height: calc(100vh - 200px);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem;
-    }
-
-    .error-content {
-        text-align: center;
-        max-width: 600px;
-    }
-
-    .error-code {
-        font-size: 8rem;
-        font-weight: 700;
-        color: var(--accent);
-        line-height: 1;
-        margin-bottom: 1rem;
-    }
-
-    .error-content h1 {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-
-    .error-content p {
-        color: var(--text-secondary);
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
-    }
-
-    .error-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin-bottom: 3rem;
-    }
-
-    .error-illustration {
-        font-size: 6rem;
-        color: var(--text-secondary);
-        opacity: 0.3;
-    }
-</style>
-{% endblock %}
+{% block extra_css %}{% endblock %}

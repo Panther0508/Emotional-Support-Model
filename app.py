@@ -24,7 +24,7 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 # Register blueprints
 app.register_blueprint(auth_bp)
@@ -212,9 +212,20 @@ def dashboard():
     
     # Get user specific stats
     user_stats = stats.get('users', {}).get(username, {
-        "conversations": 0,
-        "emotions": {}
+        "total": 0,
+        "emotions": {},
+        "first_seen": None
     })
+    
+    # Calculate active days
+    active_days = 1
+    if user_stats.get('first_seen'):
+        try:
+            first_seen = datetime.strptime(user_stats['first_seen'], "%Y-%m-%d")
+            today = datetime.now()
+            active_days = max(1, (today - first_seen).days + 1)
+        except (ValueError, TypeError):
+            active_days = 1
     
     # Calculate dominant emotion
     emotions = user_stats.get("emotions", {})
@@ -236,7 +247,8 @@ def dashboard():
             
     return render_template('dashboard.html',
                          username=username,
-                         total_conversations=user_stats.get("conversations", 0),
+                         total_conversations=user_stats.get("total", 0),
+                         active_days=active_days,
                          emotions=emotions,
                          dominant_emotion=dominant_emotion,
                          recent_history=recent_history,
@@ -400,12 +412,13 @@ def export_history():
             return jsonify({
                 'success': True,
                 'data': export_data,
+                'history': chat_history,
                 'filename': f"chat_history_{username}_{datetime.now().strftime('%Y%m%d')}.json"
             })
         except (json.JSONDecodeError, IOError):
             return jsonify({'success': False, 'message': 'Could not export history'})
     
-    return jsonify({'success': True, 'messages': []})
+    return jsonify({'success': True, 'history': []})
 
 
 @app.route('/api/stats', methods=['GET'])
@@ -479,8 +492,13 @@ def initialize_nltk():
     import nltk
     import os
     
+    # Use NLTK data path from config
+    nltk_data_path = Config.NLTK_DATA_PATH
+    
+    # Create directory if it doesn't exist
+    os.makedirs(nltk_data_path, exist_ok=True)
+    
     # Set NLTK data path
-    nltk_data_path = os.path.join(os.path.expanduser('~'), 'nltk_data')
     nltk.data.path.append(nltk_data_path)
     
     # Download required NLTK data
@@ -492,6 +510,12 @@ def initialize_nltk():
                 pass
     except Exception as e:
         print(f"NLTK initialization warning: {e}")
+
+
+@app.route('/health')
+def health_check():
+    """Health check endpoint for Render"""
+    return jsonify({'status': 'healthy', 'service': 'emotional-support-chatbot'}), 200
 
 
 # ==================== Confessions Dashboard Routes ====================
@@ -556,5 +580,9 @@ def like_confession(confession_id):
 
 
 if __name__ == '__main__':
+    # Initialize NLTK on startup
+    initialize_nltk()
+    
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    debug_mode = os.environ.get('FLASK_ENV') != 'production'
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)
