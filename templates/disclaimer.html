@@ -305,7 +305,7 @@
     <script>
         // Configuration
         const AUTO_REDIRECT_TIME = 10; // seconds
-        const AUTO_REDIRECT_URL = '/';
+        const AUTO_REDIRECT_URL = '/login';
 
         // State variables
         let remainingTime = {{ remaining_time if remaining_time is defined else AUTO_REDIRECT_TIME }};
@@ -429,7 +429,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = '/';
+                        window.location.href = '/login';
                     } else {
                         // Re-enable button on error
                         isNavigating = false;
@@ -440,7 +440,7 @@
                 .catch(error => {
                     console.error('Error:', error);
                     // Fallback redirect even if fetch fails
-                    window.location.href = '/';
+                    window.location.href = '/login';
                 });
         }
 
