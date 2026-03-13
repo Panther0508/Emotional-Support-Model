@@ -260,6 +260,8 @@ def get_response(user_input, personality="empathetic"):
     system_instruction = (
         f"You are an emotional support AI. Your personality is '{personality}'. "
         f"Description: {personality_info}. "
+        f"IMPORTANT: Always respond in English only, regardless of the language used by the user. "
+        f"Never respond in Chinese or any other language. Keep responses concise and caring."
     )
     if emotion and emotion != "neutral":
         system_instruction += f"The user seems to be feeling {emotion}. Please respond accordingly with extreme empathy and care."

@@ -204,8 +204,10 @@ class HuggingFaceClient:
                 # Use chat_completion for better conversational responses
                 model = model or "meta-llama/Llama-3.2-1B-Instruct"
                 
+                # Add system instruction to enforce English responses
                 result = client.chat_completion(
                     messages=[
+                        {"role": "system", "content": "You are a supportive emotional support assistant. Always respond in English only, regardless of the language used by the user. Keep responses concise and caring."},
                         {"role": "user", "content": prompt}
                     ],
                     model=model,
