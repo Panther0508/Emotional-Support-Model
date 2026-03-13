@@ -9,22 +9,31 @@ A **Flask-based AI chatbot** that provides **empathetic emotional support** usin
 ### Core Features
 - **Granular Emotion Detection**: Detects emotions including *happy, sad, anxious, angry, neutral* using keyword matching and TextBlob sentiment analysis
 - **Adaptive Response System**: Four distinct AI personalities (empathetic, funny, motivational, calm) for personalized interactions
-- **Multi-User Support**: Each user has their own conversation history stored locally in JSON format
-- **Coping Suggestions**: Provides context-aware tips for managing different emotional states
+- **Multi-User Support**: User authentication system with individual conversation history
+- **Coping Suggestions**: Provides context-aware tips for managing different emotional state
 - **Conversation History**: Persistent chat history with automatic saving (last 100 messages)
 - **Statistics Tracking**: Global and per-user statistics for conversations and emotions
+- **Crisis Detection**: Automatic detection of crisis keywords with immediate resource referral
+
+### Advanced AI Features
+- **Google AI Gemini Integration**: Optional integration with Google Gemini for advanced AI responses
+- **Hugging Face Integration**: Optional integration with Hugging Face Inference API for NLP tasks
+- **Sentiment Analysis**: TextBlob-powered sentiment analysis with confidence scores
 
 ### User Experience
 - **Modern Dark Theme**: Beautiful, accessible dark mode UI with smooth animations
 - **Real-time Chat Interface**: Instant responses with typing indicators
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 - **Personalized Avatars**: Visual feedback for different emotions and personalities
+- **Mandatory Disclaimer**: 60-second wait timer before accessing the application
 
 ### Technical Features
 - **RESTful API**: Clean API endpoints for all operations
+- **User Authentication**: Secure registration and login system with password hashing
 - **Session Management**: Secure user sessions with auto-generated secret keys
 - **Error Handling**: Graceful error pages and validation
-- **Local Storage**: All data stored locally for privacy (no cloud dependency)
+- **Local Storage**: Data stored locally in SQLite and JSON files for privacy
+- **API Configuration**: python-dotenv for secure API credential management
 
 ---
 
@@ -71,12 +80,22 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. **Run the application:**
+4. **Configure API keys (Optional - for advanced AI features):**
+```bash
+# Copy the example environment file
+copy env\.env.example env\.env
+
+# Edit env/.env and add your API keys:
+# HF_TOKEN=your_huggingface_token
+# GOOGLE_TOKEN=your_google_ai_key
+```
+
+5. **Run the application:**
 ```bash
 python app.py
 ```
 
-5. **Open in browser:**
+6. **Open in browser:**
 Navigate to `http://localhost:5000`
 
 ---
@@ -86,16 +105,34 @@ Navigate to `http://localhost:5000`
 ```
 Emotional-Support-Model/
 ├── app.py                      # Main Flask application
+├── auth.py                     # Authentication blueprint (login/register)
 ├── chatbot.py                  # AI response generation logic
 ├── emotion_detector.py         # Emotion detection using NLP
+├── config.py                   # Application configuration
+├── models.py                   # SQLAlchemy database models
 ├── requirements.txt            # Python dependencies
 ├── coping_suggestions.json     # Context-aware coping tips
 ├── training_data.json          # Intent patterns and responses
+├── wsgi.py                     # WSGI entry point
+│
+├── apis/                       # API Integration modules
+│   ├── __init__.py            # Package initialization
+│   ├── api_config.py          # Configuration management
+│   ├── google_ai.py           # Google AI Gemini integration
+│   ├── huggingface_api.py     # Hugging Face integration
+│   └── demo.py                # API demonstration script
+│
+├── env/                        # Environment configuration
+│   ├── .env.example           # Environment template
+│   └── .env                   # Actual environment (not committed)
 │
 ├── templates/                  # HTML templates
 │   ├── base.html              # Base template with navigation
 │   ├── index.html             # Landing page
 │   ├── chat.html              # Chat interface
+│   ├── login.html             # Login page
+│   ├── register.html          # Registration page
+│   ├── disclaimer.html        # Mandatory disclaimer page
 │   └── error.html             # Error pages
 │
 ├── static/                    # Static assets
@@ -105,6 +142,7 @@ Emotional-Support-Model/
 │       └── main.js            # Client-side JavaScript
 │
 ├── data/                      # Application data
+│   ├── app.db                 # SQLite database
 │   └── statistics.json        # Usage statistics
 │
 ├── users/                     # User data storage
@@ -117,22 +155,35 @@ Emotional-Support-Model/
 
 ## ⚙️ Configuration
 
-### Environment Variables (Optional)
+### Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the `env/` directory:
 
 ```env
-FLASK_ENV=development
-FLASK_DEBUG=True
-PORT=5000
-HOST=0.0.0.0
+# Required for basic functionality
 SECRET_KEY=your-secret-key-here
+
+# Optional - for advanced AI features
+HF_TOKEN=your_huggingface_token
+GOOGLE_TOKEN=your_google_ai_key
 ```
+
+### API Configuration
+
+This project supports optional integration with external AI services:
+
+#### Hugging Face API
+1. Get your token from: https://huggingface.co/settings/tokens
+2. Add to `env/.env`: `HF_TOKEN=your_token_here`
+
+#### Google AI (Gemini)
+1. Get your API key from: https://aistudio.google.com/app/apikey
+2. Add to `env/.env`: `GOOGLE_TOKEN=your_api_key_here`
 
 ### AI Personalities
 
 | Personality | Description | Best For |
-|------------|-------------|----------|
+|-------------|-------------|----------|
 | empathetic | Understanding and patient listener | Venting, seeking validation |
 | funny | Light-hearted and humorous | Lifting mood, casual chat |
 | motivational | Encouraging and inspiring | Seeking motivation, goals |
@@ -146,9 +197,13 @@ SECRET_KEY=your-secret-key-here
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/` | GET | Landing page |
-| `/chat` | GET | Chat interface |
+| `/` | GET | Landing page (with disclaimer) |
+| `/chat` | GET | Chat interface (requires login) |
+| `/login` | GET/POST | User login |
+| `/register` | GET/POST | User registration |
 | `/logout` | GET | Logout and clear session |
+| `/accept-disclaimer` | POST | Accept disclaimer and start timer |
+| `/check-disclaimer` | GET | Check disclaimer status |
 
 ### API Endpoints
 
@@ -192,18 +247,29 @@ curl -X POST http://localhost:5000/api/chat \
 ## 🧠 How It Works
 
 ### Emotion Detection
-1. **Keyword Matching**: First checks for emotion-specific keywords
-2. **Sentiment Analysis**: Falls back to TextBlob polarity scoring
-3. **Classification**: Maps sentiment scores to emotion categories
+1. **Keyword Matching**: First checks for emotion-specific keywords with intensity modifiers
+2. **Negation Handling**: Detects negations like "not happy"
+3. **Sentiment Analysis**: Falls back to TextBlob polarity scoring
+4. **Classification**: Maps sentiment scores to emotion categories
 
 ### Response Generation
-1. **Intent Matching**: Checks training data for matching patterns
-2. **Personality Selection**: Applies selected personality tone
-3. **Context Enhancement**: Adds coping tips for negative emotions
+1. **Crisis Detection**: First checks for crisis keywords
+2. **Intent Matching**: Checks training data for matching patterns
+3. **Emotion Detection**: Analyzes user input for emotional content
+4. **Personality Selection**: Applies selected personality tone
+5. **Context Enhancement**: Adds coping tips for negative emotions
+6. **History Saving**: Stores conversation in user history
+
+### Disclaimer System
+1. **Initial Visit**: Users see mandatory disclaimer page
+2. **Timer**: 60-second countdown prevents immediate access
+3. **Acceptance**: Button enabled after timer completes
+4. **Session**: Disclaimer status stored in session
+5. **Enforcement**: Both landing page and chat enforce disclaimer
 
 ### Data Flow
 ```
-User Input → Emotion Detection → Intent Matching → Personality Response → Add Coping Tips → Save to History → Return Response
+User Input → Crisis Check → Emotion Detection → Intent Matching → Personality Response → Add Coping Tips → Save to History → Return Response
 ```
 
 ---
@@ -212,8 +278,13 @@ User Input → Emotion Detection → Intent Matching → Personality Response �
 
 ### Backend
 - **Flask** (3.1.2) - Web framework
+- **Flask-Login** - User authentication
+- **Flask-SQLAlchemy** - Database ORM
 - **TextBlob** (0.19.0) - Natural language processing
 - **NLTK** (3.9.3) - Additional NLP capabilities
+- **Werkzeug** - Password hashing
+- **python-dotenv** - Environment variable management
+- **requests** - HTTP client for API calls
 - **Python** - Core language
 
 ### Frontend
@@ -223,15 +294,20 @@ User Input → Emotion Detection → Intent Matching → Personality Response �
 - **Font Awesome** - Icon library
 - **Google Fonts** - Typography (Poppins)
 
+### External APIs (Optional)
+- **Google AI Gemini** - Advanced text generation
+- **Hugging Face** - NLP tasks (sentiment, summarization, translation)
+
 ---
 
 ## 🔒 Privacy & Security
 
 - All conversation data is stored locally on your machine
-- No data is sent to external servers (except NLTK data downloads)
-- Usernames are sanitized to prevent path traversal
-- Session keys are auto-generated for each session
-- No analytics or tracking implemented
+- User passwords are securely hashed using Werkzeug
+- SQLite database for user accounts
+- JSON files for chat history (per user)
+- Optional API integrations are opt-in only
+- Session-based disclaimer tracking
 
 ---
 
@@ -257,6 +333,40 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 > **Important:** This AI companion is designed to provide emotional support and is NOT a substitute for professional mental health care. If you're experiencing a mental health crisis or need immediate help, please contact a qualified mental health professional or crisis hotline in your area.
 
+### Mandatory Disclaimer Page
+
+Upon first visiting the application, users must:
+1. Read the mental health disclaimer
+2. Read the API usage notice
+3. Wait 60 seconds before proceeding
+4. Accept the terms to access the application
+
+This is a legal requirement to ensure users understand the limitations of the AI system.
+
+### API Usage Disclaimer
+
+This application integrates with external AI services provided by **Google AI (Gemini)** and **Hugging Face**. By using these features:
+
+1. **Data Transmission**: Your messages may be transmitted to these third-party AI providers for processing. Review their respective privacy policies:
+   - [Google AI Privacy Policy](https://policies.google.com/privacy)
+   - [Hugging Face Privacy Policy](https://huggingface.co/privacy)
+
+2. **API Costs**: Some features may incur costs based on usage. Users are responsible for managing their own API quotas and billing.
+
+3. **Service Availability**: External API services may experience downtime or rate limiting. The application is not responsible for service interruptions.
+
+4. **Content Moderation**: AI-generated responses are generated by third-party models and may not always be appropriate. Users should exercise judgment and not rely on AI responses for critical decisions.
+
+5. **Terms of Service**: By using this application, you agree to comply with the Terms of Service of both Google AI and Hugging Face.
+
+### Liability
+
+The developers of this project are not liable for:
+- Any damages arising from the use of AI-generated responses
+- Decisions made based on AI suggestions
+- Third-party API service disruptions
+- Any breach of data when transmitting to external services
+
 ---
 
 ## 🙏 Acknowledgments
@@ -265,8 +375,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - NLTK for natural language processing
 - Font Awesome for icons
 - Google Fonts for typography
+- Google AI for Gemini API
+- Hugging Face for Inference API
 
 ---
 
 **Made with 💛 for mental wellness**
-

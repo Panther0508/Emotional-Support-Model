@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    .history-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .message-timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .message-timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .history-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+        position: relative;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .history-card:hover {
+        transform: translateX(10px);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .history-card::before {
+        content: '';
+        position: absolute;
+        left: -2rem;
+        top: 2rem;
+        width: 1rem;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .history-card::after {
+        content: '';
+        position: absolute;
+        left: -2.3rem;
+        top: 1.75rem;
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: var(--text-color);
+        box-shadow: 0 0 10px currentColor;
+    }
+
+    .history-card.user-msg::after {
+        background: #00f2fe;
+    }
+
+    .history-card.bot-msg::after {
+        background: #4facfe;
+    }
+
+    .msg-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .msg-sender {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .msg-time {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .msg-content {
+        line-height: 1.6;
+    }
+
+    .emotion-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--glass-bg);
+        border: 1px dashed var(--glass-border);
+        border-radius: var(--border-radius);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-container animate-fade-in">
+    <div class="history-header">
+        <div>
+            <h1 class="mb-2">Chat History</h1>
+            <p class="text-light m-0">Review your past conversations and emotional journey.</p>
+        </div>
+        <div>
+            {% if chat_history %}
+            <button onclick="clearHistory()" class="btn btn-outline-danger">
+                <i class="fas fa-trash-alt me-2"></i>Clear History
+            </button>
+            <button onclick="exportHistory()" class="btn btn-outline-info ms-2">
+                <i class="fas fa-download me-2"></i>Export
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if chat_history %}
+    <div class="message-timeline">
+        {% for msg in chat_history | reverse %}
+        <div class="history-card {{ 'user-msg' if msg.sender == 'user' else 'bot-msg' }}">
+            <div class="msg-header">
+                <div class="msg-sender">
+                    {% if msg.sender == 'user' %}
+                    <i class="fas fa-user-circle fs-4 text-info"></i> You
+                    {% else %}
+                    <i class="fas fa-robot fs-4 text-primary"></i> AI Assistant
+                    {% endif %}
+                </div>
+                <div class="msg-time">{{ msg.timestamp }}</div>
+            </div>
+            
+            <div class="msg-content mb-3">
+                {{ msg.text }}
+            </div>
+            
+            {% if msg.sender == 'user' and msg.emotion %}
+            <div class="emotion-badge" style="color: {{ msg.emotion | emotion_color }}; border: 1px solid currentColor;">
+                {{ msg.emotion | emotion_emoji }} {{ msg.emotion | capitalize }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-comment-slash"></i>
+        <h3>No history yet</h3>
+        <p class="text-muted">Your conversation history will appear here once you start chatting.</p>
+        <a href="{{ url_for('chat') }}" class="btn btn-primary mt-3">Start Chatting</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function clearHistory() {
+        if (confirm("Are you sure you want to clear your entire chat history? This cannot be undone.")) {
+            fetch('/api/clear_history', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert("Error clearing history.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Failed to clear history. Please try again.");
+            });
+        }
+    }
+
+    function exportHistory() {
+        window.location.href = '/api/export_history';
+    }
+</script>
+{% endblock %}

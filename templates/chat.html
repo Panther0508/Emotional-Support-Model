@@ -4,58 +4,6 @@
 
 {% block content %}
 <div class="chat-page">
-    {% if not username %}
-    <!-- Login Modal -->
-    <div class="login-modal" id="loginModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <i class="fas fa-heart"></i>
-                <h2>Welcome! Let's Get Started</h2>
-                <p class="modal-subtitle">Choose your name and AI personality to begin</p>
-            </div>
-
-            <form id="loginForm" class="login-form">
-                <div class="form-group">
-                    <label for="username">
-                        <i class="fas fa-user"></i> Your Name
-                    </label>
-                    <input type="text" id="username" name="username" placeholder="Enter your name" required
-                        autocomplete="off" minlength="2" maxlength="30">
-                    <small>Your name is used to save your chat history locally</small>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <i class="fas fa-smile"></i> Choose AI Personality
-                    </label>
-                    <div class="personality-options">
-                        {% for p in personalities %}
-                        <label class="personality-option">
-                            <input type="radio" name="personality" value="{{ p }}" {% if p=='empathetic' %}checked{%
-                                endif %}>
-                            <div class="option-content {{ p }}">
-                                <i class="fas fa-{{ personality_info[p].icon }}"></i>
-                                <span>{{ personality_info[p].name }}</span>
-                                <small>{{ personality_info[p].best_for }}</small>
-                            </div>
-                        </label>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <div class="form-disclaimer">
-                    <i class="fas fa-info-circle"></i>
-                    <span>Remember: This AI is not a substitute for professional mental health care.</span>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-sign-in-alt"></i> Start Chatting
-                </button>
-            </form>
-        </div>
-    </div>
-    {% else %}
-
     <!-- Main Chat Interface -->
     <div class="chat-container">
         <!-- Sidebar -->
@@ -145,7 +93,7 @@
             </div>
 
             <div class="sidebar-footer">
-                <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
@@ -297,8 +245,7 @@
             </div>
         </div>
     </div>
-    {% endif %}
-</div>
+    </div>
 {% endblock %}
 
 {% block extra_css %}
@@ -1217,62 +1164,6 @@
         loadEmotionSummary();
     });
 
-    function initChat() {
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-
-        if (messageInput && sendBtn) {
-            messageInput.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-
-            // Auto-focus input
-            messageInput.focus();
-
-            // Scroll to bottom
-            scrollToBottom();
-        }
-
-        // Login form
-        const loginForm = document.getElementById('loginForm');
-        if (loginForm) {
-            loginForm.addEventListener('submit', handleLogin);
-        }
-    }
-
-    async function handleLogin(e) {
-        e.preventDefault();
-
-        const username = document.getElementById('username').value.trim();
-        const personality = document.querySelector('input[name="personality"]:checked').value;
-
-        if (!username) {
-            showNotification('Please enter a username', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/set_user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, personality })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                location.reload();
-            } else {
-                showNotification(data.message, 'error');
-            }
-        } catch (error) {
-            showNotification('An error occurred. Please try again.', 'error');
-        }
-    }
-
     async function sendMessage(text) {
         const messageInput = document.getElementById('messageInput');
         const message = text || messageInput.value.trim();
@@ -1310,6 +1201,26 @@
         } catch (error) {
             hideTypingIndicator();
             showNotification('An error occurred. Please try again.', 'error');
+        }
+    }
+    
+    function initChat() {
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        if (messageInput && sendBtn) {
+            messageInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Auto-focus input
+            messageInput.focus();
+
+            // Scroll to bottom
+            scrollToBottom();
         }
     }
 

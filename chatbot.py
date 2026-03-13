@@ -237,7 +237,7 @@ def get_random_encouragement():
 
 def get_response(user_input, personality="empathetic"):
     """
-    Get AI response based on user input and personality
+    Get AI response based on user input and personality using external APIs.
     
     Args:
         user_input: The user's message
@@ -248,47 +248,69 @@ def get_response(user_input, personality="empathetic"):
     """
     user_input_clean = user_input.strip()
     
-    # Check for crisis keywords first
+    # 1. Check for crisis keywords first (immediate priority)
     if is_crisis_keywords(user_input_clean):
         return get_crisis_response(), "sad"  # Return crisis response with sad emotion
     
-    # Check for greetings
-    greetings = ["hello", "hi", "hey", "good morning", "good afternoon", "good evening", "howdy"]
-    if user_input_clean.lower() in greetings or any(g in user_input_clean.lower() for g in ["hello", "hi", "hey"]):
-        return get_greeting_response(), "happy"
-    
-    # Check for farewells
-    farewells = ["bye", "goodbye", "see you", "later", "gotta go", "have to go"]
-    if any(f in user_input_clean.lower() for f in farewells):
-        return get_farewell_response(), "happy"
-    
-    # Check for thanks
-    thanks = ["thank", "thanks", "appreciate", "grateful"]
-    if any(t in user_input_clean.lower() for t in thanks):
-        thanks_responses = [
-            "You're so welcome! That's what I'm here for. 💛",
-            "Of course! Always happy to help. 🌟",
-            "You're welcome! Thank you for trusting me. 💙"
-        ]
-        return random.choice(thanks_responses), "happy"
-    
-    # First try to match an intent from training data
-    intent_response = match_intent(user_input_clean)
-    
-    # Detect emotion from input
+    # Detect emotion from input for context
     emotion = detect_emotion(user_input_clean)
     
-    # Get personality-specific response
-    personality_responses = personalities.get(personality, personalities["empathetic"])
-    base_responses = personality_responses.get(emotion, personality_responses["neutral"])
-    base_response = random.choice(base_responses)
+    # 2. Get AI personality description for system prompting
+    personality_info = get_personality_description(personality)
+    system_instruction = (
+        f"You are an emotional support AI. Your personality is '{personality}'. "
+        f"Description: {personality_info}. "
+    )
+    if emotion and emotion != "neutral":
+        system_instruction += f"The user seems to be feeling {emotion}. Please respond accordingly with extreme empathy and care."
+        
+    # Import the API clients
+    from apis.api_config import get_config
+    from apis.google_ai import GoogleAIClient, GoogleAIError
+    from apis.huggingface_api import HuggingFaceClient, HuggingFaceError
     
-    # If we matched an intent, use that instead of base response
-    if intent_response:
-        response = intent_response
-    else:
-        response = base_response
+    config = get_config()
+    response = None
     
+    # 3. Try Google AI (Gemini) First
+    if config.is_google_configured:
+        try:
+            google_client = GoogleAIClient(config)
+            response = google_client.generate_text(
+                prompt=user_input_clean,
+                system_instruction=system_instruction,
+                temperature=0.7,
+                max_output_tokens=300
+            )
+        except Exception as e:
+            print(f"Google AI Error: {e}")
+            response = None
+            
+    # 4. Try Hugging Face if Google AI fails or isn't configured
+    if not response and config.is_hf_configured:
+        try:
+            hf_client = HuggingFaceClient(config)
+            hf_prompt = f"System: {system_instruction}\nUser: {user_input_clean}\nSupportive AI Response:"
+            response = hf_client.generate_text(
+                prompt=hf_prompt,
+                max_new_tokens=300,
+                temperature=0.7
+            )
+        except Exception as e:
+            print(f"Hugging Face Error: {e}")
+            response = None
+
+    # 5. Local Fallback logic if both APIs fail or aren't configured
+    if not response:
+        print("Falling back to local static responses.")
+        intent_response = match_intent(user_input_clean)
+        if intent_response:
+            response = intent_response
+        else:
+            personality_responses = personalities.get(personality, personalities["empathetic"])
+            base_responses = personality_responses.get(emotion, personality_responses["neutral"])
+            response = random.choice(base_responses)
+
     # Add coping tip for negative emotions (unless it's a crisis response)
     if emotion in ["sad", "anxious", "angry"] and not is_crisis_keywords(user_input_clean):
         tips = coping_suggestions.get(emotion, ["Take a deep breath"])

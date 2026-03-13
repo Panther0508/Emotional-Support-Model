@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Confessions - Emotional Support</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6B6B;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --light: #eaf6f6;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--darker);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .post-form {
+            background: var(--dark);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .post-form h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+
+        .post-type-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .post-type-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .post-type-option input[type="radio"] {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+        }
+
+        .post-type-option label {
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .post-form textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: var(--darker);
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .post-form textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .post-form textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .submit-btn {
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .submit-btn:hover {
+            background: #5a52d5;
+        }
+
+        .submit-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .confession-card {
+            background: var(--dark);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .confession-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .confession-type {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .confession-type.confession {
+            background: rgba(255, 107, 107, 0.2);
+            color: var(--secondary);
+        }
+
+        .confession-type.observation {
+            background: rgba(108, 99, 255, 0.2);
+            color: var(--primary);
+        }
+
+        .confession-time {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .confession-content {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .confession-actions {
+            display: flex;
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .like-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .like-btn:hover {
+            color: var(--secondary);
+        }
+
+        .like-btn.liked {
+            color: var(--secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        .nav-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: rgba(255, 107, 107, 0.2);
+            color: var(--secondary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(0, 200, 81, 0.2);
+            color: #00C851;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+
+            .post-form {
+                padding: 20px;
+            }
+
+            .confession-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Anonymous Confessions</h1>
+            <p>Share your thoughts and observations anonymously</p>
+        </div>
+
+        <div class="post-form">
+            <h2>Share Something Anonymous</h2>
+            <form id="confessionForm">
+                <div class="post-type-selector">
+                    <div class="post-type-option">
+                        <input type="radio" id="confession" name="post_type" value="confession" checked>
+                        <label for="confession">Confession</label>
+                    </div>
+                    <div class="post-type-option">
+                        <input type="radio" id="observation" name="post_type" value="observation">
+                        <label for="observation">Observation</label>
+                    </div>
+                </div>
+                <textarea id="content" placeholder="Share your confession or observation..."
+                    maxlength="1000"></textarea>
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+                <button type="submit" class="submit-btn" id="submitBtn">Post Anonymously</button>
+            </form>
+        </div>
+
+        <div class="feed" id="feed">
+            {% if confessions %}
+            {% for confession in confessions %}
+            <div class="confession-card" data-id="{{ confession.id }}">
+                <div class="confession-header">
+                    <span class="confession-type {{ confession.post_type }}">{{ confession.post_type }}</span>
+                    <span class="confession-time">{{ confession.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <div class="confession-content">{{ confession.content }}</div>
+                <div class="confession-actions">
+                    <button class="like-btn" onclick="likeConfession({{ confession.id }})">
+                        <span class="like-icon">♥</span>
+                        <span class="like-count">{{ confession.likes }}</span>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <p>No confessions yet. Be the first to share!</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/" class="nav-link">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('confessionForm');
+        const contentInput = document.getElementById('content');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const feed = document.getElementById('feed');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const content = contentInput.value.trim();
+            const postType = document.querySelector('input[name="post_type"]:checked').value;
+
+            if (!content) {
+                showError('Please enter some content');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Posting...';
+            hideMessages();
+
+            try {
+                const response = await fetch('/api/confessions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: content,
+                        post_type: postType
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Posted successfully!');
+                    contentInput.value = '';
+
+                    // Add new confession to the top of the feed
+                    const confession = data.confession;
+                    const emptyState = feed.querySelector('.empty-state');
+                    if (emptyState) {
+                        emptyState.remove();
+                    }
+
+                    const newCard = createConfessionCard(confession);
+                    feed.insertBefore(newCard, feed.firstChild);
+                } else {
+                    showError(data.message || 'Failed to post');
+                }
+            } catch (error) {
+                showError('An error occurred. Please try again.');
+                console.error('Error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Post Anonymously';
+            }
+        });
+
+        function createConfessionCard(confession) {
+            const card = document.createElement('div');
+            card.className = 'confession-card';
+            card.setAttribute('data-id', confession.id);
+
+            const date = new Date(confession.created_at);
+            const formattedDate = date.toISOString().slice(0, 16).replace('T', ' ');
+
+            card.innerHTML = `
+                <div class="confession-header">
+                    <span class="confession-type ${confession.post_type}">${confession.post_type}</span>
+                    <span class="confession-time">${formattedDate}</span>
+                </div>
+                <div class="confession-content">${escapeHtml(confession.content)}</div>
+                <div class="confession-actions">
+                    <button class="like-btn" onclick="likeConfession(${confession.id})">
+                        <span class="like-icon">♥</span>
+                        <span class="like-count">${confession.likes}</span>
+                    </button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function likeConfession(id) {
+            const card = document.querySelector(`.confession-card[data-id="${id}"]`);
+            if (!card) return;
+
+            const likeBtn = card.querySelector('.like-btn');
+            const likeCount = card.querySelector('.like-count');
+
+            try {
+                const response = await fetch(`/api/confessions/${id}/like`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    likeCount.textContent = data.likes;
+                    likeBtn.classList.add('liked');
+                }
+            } catch (error) {
+                console.error('Error liking confession:', error);
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function hideMessages() {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

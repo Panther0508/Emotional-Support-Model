@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Important Disclaimer - Emotional Support AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6B6B;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --light: #eaf6f6;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .disclaimer-container {
+            background: var(--darker);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .warning-icon {
+            text-align: center;
+            font-size: 60px;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 25px;
+            color: var(--secondary);
+        }
+
+        .disclaimer-content {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 4px solid var(--secondary);
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 25px;
+        }
+
+        .disclaimer-content h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+
+        .disclaimer-content p,
+        .disclaimer-content li {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .disclaimer-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .disclaimer-content li i {
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        .api-notice {
+            background: rgba(108, 99, 255, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 25px;
+        }
+
+        .api-notice h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .api-notice p,
+        .api-notice li {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .api-notice ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .api-notice li i {
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        .timer-section {
+            text-align: center;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .timer-section h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--text-muted);
+        }
+
+        .timer {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: monospace;
+        }
+
+        .timer.warning {
+            color: var(--secondary);
+        }
+
+        .timer.complete {
+            color: #00C851;
+        }
+
+        .button-container {
+            text-align: center;
+        }
+
+        .btn-accept {
+            background: linear-gradient(135deg, var(--primary) 0%, #5a52d5 100%);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-accept:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(108, 99, 255, 0.4);
+        }
+
+        .btn-accept:disabled {
+            background: #555;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .btn-accept .fa {
+            margin-right: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            border-radius: 3px;
+            transition: width 1s linear;
+        }
+
+        .crisis-info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .crisis-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .crisis-info a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+
+        .crisis-info a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="disclaimer-container">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+
+        <h1>⚠️ Important Disclaimer</h1>
+
+        <div class="disclaimer-content">
+            <h2><i class="fas fa-heart"></i> Mental Health Disclaimer</h2>
+            <p>This AI companion is designed to provide <strong>emotional support only</strong> and is
+                <strong>NOT</strong> a substitute for professional mental health care.
+            </p>
+            <ul>
+                <li><i class="fas fa-times-circle"></i> This is NOT a medical device</li>
+                <li><i class="fas fa-times-circle"></i> AI responses are NOT professional advice</li>
+                <li><i class="fas fa-times-circle"></i> If you're in crisis, please seek immediate help</li>
+            </ul>
+        </div>
+
+        <div class="api-notice">
+            <h2><i class="fas fa-robot"></i> AI API Usage Notice</h2>
+            <p>This application uses external AI services. By proceeding, you acknowledge:</p>
+            <ul>
+                <li><i class="fas fa-check-circle"></i> Your messages may be transmitted to Google AI and/or Hugging
+                    Face</li>
+                <li><i class="fas fa-check-circle"></i> Review their privacy policies for data handling</li>
+                <li><i class="fas fa-check-circle"></i> API usage may incur costs based on your plan</li>
+                <li><i class="fas fa-check-circle"></i> AI-generated responses may not always be accurate or appropriate
+                </li>
+            </ul>
+        </div>
+
+        <div class="timer-section">
+            <h3>Redirecting in:</h3>
+            <div class="timer {% if remaining_time is defined and remaining_time > 5 %}warning{% elif remaining_time is defined and remaining_time == 0 %}complete{% endif %}"
+                id="timer">
+                {% if remaining_time is defined %}{{ remaining_time }}{% else %}10{% endif %}
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"
+                    style="width: {% if remaining_time is defined %}{{ ((10 - remaining_time) / 10 * 100) if remaining_time > 0 else 100 }}{% else %}0{% endif %}%">
+                </div>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button class="btn-accept" id="acceptBtn" onclick="acceptDisclaimer()">
+                <i class="fas fa-check"></i> I Understand & Accept (Continue)
+            </button>
+        </div>
+
+        <div class="crisis-info">
+            <p><strong>Need immediate help?</strong> Contact a crisis hotline:</p>
+            <p>
+                <a href="tel:988">988 (Suicide & Crisis Lifeline)</a> |
+                <a href="tel:741741">741741 (Crisis Text Line)</a> |
+                <a href="https://findahelpline.com" target="_blank">Find a Helpline</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const AUTO_REDIRECT_TIME = 10; // seconds
+        const AUTO_REDIRECT_URL = '/';
+
+        // State variables
+        let remainingTime = {{ remaining_time if remaining_time is defined else AUTO_REDIRECT_TIME }};
+        let countdown = null;
+        let autoRedirectTimer = null;
+        let isNavigating = false;
+
+        // DOM Elements
+        const timerElement = document.getElementById('timer');
+        const progressElement = document.getElementById('progress');
+        const acceptBtn = document.getElementById('acceptBtn');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            // Start countdown
+            startCountdown();
+
+            // Handle page visibility changes
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+
+            // Handle page unload to prevent memory leaks
+            window.addEventListener('beforeunload', cleanupTimers);
+            window.addEventListener('pagehide', cleanupTimers);
+        });
+
+        function startCountdown() {
+            // Clear any existing timers
+            cleanupTimers();
+
+            // Start the countdown
+            countdown = setInterval(() => {
+                if (isNavigating) return;
+
+                remainingTime--;
+
+                if (remainingTime >= 0) {
+                    updateTimerDisplay();
+
+                    if (remainingTime <= 5 && remainingTime > 0) {
+                        timerElement.classList.add('warning');
+                    }
+
+                    if (remainingTime === 0) {
+                        timerElement.classList.remove('warning');
+                        timerElement.classList.add('complete');
+                        // Auto-redirect when timer reaches 0
+                        triggerAutoRedirect();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            timerElement.textContent = remainingTime;
+            const progress = ((AUTO_REDIRECT_TIME - remainingTime) / AUTO_REDIRECT_TIME) * 100;
+            progressElement.style.width = progress + '%';
+        }
+
+        function triggerAutoRedirect() {
+            // Clear all timers
+            cleanupTimers();
+
+            // Mark as navigating to prevent other triggers
+            isNavigating = true;
+
+            // Auto-accept disclaimer and redirect
+            fetch('/accept-disclaimer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Redirect to the destination
+                    window.location.href = AUTO_REDIRECT_URL;
+                })
+                .catch(error => {
+                    console.error('Auto-redirect error:', error);
+                    // Fallback redirect even if fetch fails
+                    window.location.href = AUTO_REDIRECT_URL;
+                });
+        }
+
+        function cleanupTimers() {
+            if (countdown) {
+                clearInterval(countdown);
+                countdown = null;
+            }
+            if (autoRedirectTimer) {
+                clearTimeout(autoRedirectTimer);
+                autoRedirectTimer = null;
+            }
+        }
+
+        function handleVisibilityChange() {
+            if (document.visibilityState === 'hidden') {
+                // Page is hidden, timer continues running in background
+                // The interval will still fire when page becomes visible
+            }
+        }
+
+        function acceptDisclaimer() {
+            // Prevent multiple clicks
+            if (isNavigating) return;
+            isNavigating = true;
+
+            // Clear all timers immediately to prevent auto-redirect
+            cleanupTimers();
+
+            // Disable button to prevent double submission
+            acceptBtn.disabled = true;
+            acceptBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting...';
+
+            fetch('/accept-disclaimer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/';
+                    } else {
+                        // Re-enable button on error
+                        isNavigating = false;
+                        acceptBtn.disabled = false;
+                        acceptBtn.innerHTML = '<i class="fas fa-check"></i> I Understand & Accept (Continue)';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Fallback redirect even if fetch fails
+                    window.location.href = '/';
+                });
+        }
+
+        // Backup: If somehow the page loads but countdown doesn't start, start it
+        if (!countdown && remainingTime > 0) {
+            startCountdown();
+        }
+    </script>
+</body>
+
+</html>

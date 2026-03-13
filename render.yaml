@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: emotional-support-chatbot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: HF_TOKEN
+        sync: false
+      - key: GOOGLE_TOKEN
+        sync: false
+    autoDeploy: true

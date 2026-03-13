@@ -12,6 +12,29 @@ app = Flask(__name__)
 app.config.from_object(Config)
 Config.init_app(app)
 
+from flask_login import LoginManager, current_user
+from models import db, User
+from auth import auth_bp
+
+# Initialize extensions
+db.init_app(app)
+login_manager = LoginManager()
+login_manager.login_view = 'auth.login'
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# Register blueprints
+app.register_blueprint(auth_bp)
+
+with app.app_context():
+    try:
+        db.create_all()
+    except Exception as e:
+        print(f"Error creating database: {e}")
+
 # Register custom Jinja2 filters
 @app.template_filter('emotion_color')
 def emotion_color_filter(emotion):
@@ -107,7 +130,50 @@ def validate_personality(personality):
 def index():
     """Main landing page"""
     stats = load_statistics()
+    
+    # Check if disclaimer has been accepted
+    disclaimer_accepted = session.get('disclaimer_accepted', False)
+    disclaimer_timestamp = session.get('disclaimer_timestamp', 0)
+    
+    # If not accepted or not enough time has passed, show disclaimer
+    if not disclaimer_accepted:
+        return render_template('disclaimer.html', stats=stats)
+    
+    # Check if 10 seconds have passed since disclaimer was shown
+    import time
+    current_time = time.time()
+    time_elapsed = current_time - disclaimer_timestamp if disclaimer_timestamp > 0 else 0
+    
+    if time_elapsed < 10:
+        remaining_time = 10 - int(time_elapsed)
+        return render_template('disclaimer.html', stats=stats, remaining_time=remaining_time)
+    
     return render_template('index.html', stats=stats)
+
+
+@app.route('/accept-disclaimer', methods=['POST'])
+def accept_disclaimer():
+    """Accept the disclaimer and start the 10-second timer"""
+    import time
+    session['disclaimer_accepted'] = True
+    session['disclaimer_timestamp'] = time.time()
+    return jsonify({'success': True, 'message': 'Disclaimer accepted'})
+
+
+@app.route('/check-disclaimer', methods=['GET'])
+def check_disclaimer():
+    """Check if disclaimer timer is complete"""
+    import time
+    disclaimer_timestamp = session.get('disclaimer_timestamp', 0)
+    current_time = time.time()
+    time_elapsed = current_time - disclaimer_timestamp if disclaimer_timestamp > 0 else 0
+    remaining_time = max(0, 10 - int(time_elapsed))
+    
+    return jsonify({
+        'accepted': session.get('disclaimer_accepted', False),
+        'remaining_time': remaining_time,
+        'complete': remaining_time == 0
+    })
 
 
 @app.route('/about')
@@ -122,10 +188,28 @@ def features():
     return render_template('index.html', stats=load_statistics(), section='features')
 
 
+from flask_login import login_required, current_user
+
 @app.route('/chat')
+@login_required
 def chat():
     """Chat interface page"""
-    username = session.get('username')
+    # Check disclaimer acceptance before allowing chat access
+    import time
+    disclaimer_accepted = session.get('disclaimer_accepted', False)
+    disclaimer_timestamp = session.get('disclaimer_timestamp', 0)
+    
+    if not disclaimer_accepted:
+        return render_template('disclaimer.html', stats=load_statistics())
+    
+    current_time = time.time()
+    time_elapsed = current_time - disclaimer_timestamp if disclaimer_timestamp > 0 else 0
+    
+    if time_elapsed < 10:
+        remaining_time = 10 - int(time_elapsed)
+        return render_template('disclaimer.html', stats=load_statistics(), remaining_time=remaining_time)
+    
+    username = current_user.username
     personality = session.get('personality', Config.DEFAULT_PERSONALITY)
     
     # Load user chat history
@@ -152,41 +236,75 @@ def chat():
                          personality_info=personality_info)
 
 
-@app.route('/api/set_user', methods=['POST'])
-def set_user():
-    """Set user session"""
-    data = request.get_json()
-    username = data.get('username', '').strip()
-    personality = validate_personality(data.get('personality', Config.DEFAULT_PERSONALITY))
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    """User dashboard view"""
+    username = current_user.username
+    stats = load_statistics()
     
-    if not username:
-        return jsonify({'success': False, 'message': 'Please enter a username'})
-    
-    if len(username) < 2:
-        return jsonify({'success': False, 'message': 'Username must be at least 2 characters'})
-    
-    if len(username) > 30:
-        return jsonify({'success': False, 'message': 'Username must be less than 30 characters'})
-    
-    # Sanitize username
-    username = sanitize_username(username)
-    
-    session['username'] = username
-    session['personality'] = personality
-    
-    return jsonify({
-        'success': True, 
-        'username': username, 
-        'personality': personality,
-        'message': f'Welcome, {username}! You are now chatting with the {personality} AI.'
+    # Get user specific stats
+    user_stats = stats.get('users', {}).get(username, {
+        "conversations": 0,
+        "emotions": {}
     })
+    
+    # Calculate dominant emotion
+    emotions = user_stats.get("emotions", {})
+    dominant_emotion = "neutral"
+    if emotions:
+        dominant_emotion = max(emotions, key=emotions.get)
+        
+    # Get recent history
+    recent_history = []
+    user_file = os.path.join(Config.USERS_DIR, f"{username}.json")
+    if os.path.exists(user_file):
+        try:
+            with open(user_file, 'r', encoding='utf-8') as f:
+                history = json.load(f)
+                recent_history = history[-10:] if history else [] # Last 10 messages
+                recent_history.reverse() # Newest first
+        except (json.JSONDecodeError, IOError):
+            pass
+            
+    return render_template('dashboard.html',
+                         username=username,
+                         total_conversations=user_stats.get("conversations", 0),
+                         emotions=emotions,
+                         dominant_emotion=dominant_emotion,
+                         recent_history=recent_history,
+                         stats=stats)
+
+
+@app.route('/history')
+@login_required
+def history():
+    """Full chat history view"""
+    username = current_user.username
+    stats = load_statistics()
+    
+    chat_history = []
+    user_file = os.path.join(Config.USERS_DIR, f"{username}.json")
+    if os.path.exists(user_file):
+        try:
+            with open(user_file, 'r', encoding='utf-8') as f:
+                chat_history = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+            
+    return render_template('history.html',
+                         username=username,
+                         chat_history=chat_history,
+                         stats=stats)
+
+
+# The `/api/set_user` route has been removed in favor of the new auth blueprint `/login` and `/register`.
 
 
 @app.route('/api/change_personality', methods=['POST'])
+@login_required
 def change_personality():
     """Change AI personality"""
-    if not session.get('username'):
-        return jsonify({'success': False, 'message': 'Not logged in'})
     
     data = request.get_json()
     personality = validate_personality(data.get('personality', Config.DEFAULT_PERSONALITY))
@@ -201,18 +319,16 @@ def change_personality():
 
 
 @app.route('/api/chat', methods=['POST'])
+@login_required
 def chat_api():
     """Handle chat messages"""
     data = request.get_json()
     user_input = data.get('message', '').strip()
-    username = session.get('username')
+    username = current_user.username
     personality = session.get('personality', Config.DEFAULT_PERSONALITY)
     
     if not user_input:
         return jsonify({'success': False, 'message': 'Please enter a message'})
-    
-    if not username:
-        return jsonify({'success': False, 'message': 'Please set a username first'})
     
     if len(user_input) > 2000:
         return jsonify({'success': False, 'message': 'Message too long (max 2000 characters)'})
@@ -262,12 +378,10 @@ def chat_api():
 
 
 @app.route('/api/history', methods=['GET'])
+@login_required
 def get_history():
     """Get user chat history"""
-    username = session.get('username')
-    
-    if not username:
-        return jsonify({'success': False, 'message': 'Not logged in'})
+    username = current_user.username
     
     user_file = os.path.join(Config.USERS_DIR, f"{username}.json")
     if os.path.exists(user_file):
@@ -282,12 +396,10 @@ def get_history():
 
 
 @app.route('/api/history/clear', methods=['POST'])
+@login_required
 def clear_history():
     """Clear user chat history"""
-    username = session.get('username')
-    
-    if not username:
-        return jsonify({'success': False, 'message': 'Not logged in'})
+    username = current_user.username
     
     user_file = os.path.join(Config.USERS_DIR, f"{username}.json")
     if os.path.exists(user_file):
@@ -300,12 +412,10 @@ def clear_history():
 
 
 @app.route('/api/export', methods=['GET'])
+@login_required
 def export_history():
     """Export user chat history as JSON"""
-    username = session.get('username')
-    
-    if not username:
-        return jsonify({'success': False, 'message': 'Not logged in'})
+    username = current_user.username
     
     user_file = os.path.join(Config.USERS_DIR, f"{username}.json")
     if os.path.exists(user_file):
@@ -339,12 +449,10 @@ def get_stats():
 
 
 @app.route('/api/user_stats', methods=['GET'])
+@login_required
 def get_user_stats():
     """Get statistics for current user"""
-    username = session.get('username')
-    
-    if not username:
-        return jsonify({'success': False, 'message': 'Not logged in'})
+    username = current_user.username
     
     stats = load_statistics()
     user_stats = stats.get('users', {}).get(username, {})
@@ -374,12 +482,7 @@ def get_quick_stats():
     })
 
 
-@app.route('/logout')
-def logout():
-    """Log out user"""
-    username = session.get('username')
-    session.clear()
-    return redirect(url_for('index'))
+# The /logout route is now handled by the auth blueprint.
 
 
 # Error handlers
@@ -422,6 +525,67 @@ def initialize_nltk():
                 pass
     except Exception as e:
         print(f"NLTK initialization warning: {e}")
+
+
+# ==================== Confessions Dashboard Routes ====================
+
+@app.route('/confessions')
+def confessions():
+    """Confessions dashboard - anonymous posts"""
+    from models import Confession
+    
+    # Get all confessions ordered by newest first
+    all_confessions = Confession.query.order_by(Confession.created_at.desc()).all()
+    
+    return render_template('confessions.html', confessions=all_confessions)
+
+
+@app.route('/api/confessions', methods=['POST'])
+def create_confession():
+    """Create a new anonymous confession"""
+    from models import Confession
+    
+    data = request.get_json()
+    content = data.get('content', '').strip()
+    post_type = data.get('post_type', 'confession')
+    
+    if not content:
+        return jsonify({'success': False, 'message': 'Content is required'}), 400
+    
+    if len(content) > 1000:
+        return jsonify({'success': False, 'message': 'Content must be less than 1000 characters'}), 400
+    
+    # Create new confession
+    confession = Confession(content=content, post_type=post_type)
+    db.session.add(confession)
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Confession posted successfully',
+        'confession': {
+            'id': confession.id,
+            'content': confession.content,
+            'post_type': confession.post_type,
+            'created_at': confession.created_at.isoformat(),
+            'likes': confession.likes
+        }
+    })
+
+
+@app.route('/api/confessions/<int:confession_id>/like', methods=['POST'])
+def like_confession(confession_id):
+    """Like a confession"""
+    from models import Confession
+    
+    confession = Confession.query.get(confession_id)
+    if not confession:
+        return jsonify({'success': False, 'message': 'Confession not found'}), 404
+    
+    confession.likes += 1
+    db.session.commit()
+    
+    return jsonify({'success': True, 'likes': confession.likes})
 
 
 if __name__ == '__main__':
