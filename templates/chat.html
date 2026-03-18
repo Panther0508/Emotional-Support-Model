@@ -9,6 +9,9 @@
         <!-- Sidebar -->
         <aside class="chat-sidebar">
             <div class="sidebar-header">
+                <button class="mobile-close-btn" onclick="toggleMobileSidebar()" aria-label="Close sidebar" style="display: none;">
+                    <i class="fas fa-times"></i>
+                </button>
                 <div class="user-profile">
                     <div class="avatar">
                         <i class="fas fa-user"></i>
@@ -50,13 +53,13 @@
             <div class="sidebar-section">
                 <h4>Quick Actions</h4>
                 <div class="quick-actions">
-                    <button class="action-btn" onclick="clearHistory()" title="Clear Chat History">
+                    <button class="action-btn" onclick="clearHistory()" title="Clear Chat History" aria-label="Clear chat history">
                         <i class="fas fa-trash"></i> Clear History
                     </button>
-                    <button class="action-btn" onclick="loadStats()" title="View Statistics">
+                    <button class="action-btn" onclick="loadStats()" title="View Statistics" aria-label="View statistics">
                         <i class="fas fa-chart-bar"></i> View Stats
                     </button>
-                    <button class="action-btn" onclick="exportHistory()" title="Export Chat History">
+                    <button class="action-btn" onclick="exportHistory()" title="Export Chat History" aria-label="Export chat history">
                         <i class="fas fa-download"></i> Export
                     </button>
                 </div>
@@ -103,6 +106,9 @@
         <main class="chat-main">
             <header class="chat-header">
                 <div class="chat-header-info">
+                    <button class="mobile-sidebar-toggle icon-btn d-none" onclick="toggleMobileSidebar()" aria-label="Toggle sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
                     <div class="ai-avatar-small">
                         <i class="fas fa-robot"></i>
                     </div>
@@ -115,7 +121,7 @@
                     </div>
                 </div>
                 <div class="chat-header-actions">
-                    <button class="icon-btn" onclick="refreshChat()" title="Refresh">
+                    <button class="icon-btn" onclick="refreshChat()" title="Refresh" aria-label="Refresh chat">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
@@ -186,11 +192,11 @@
             <!-- Input Area -->
             <div class="input-area">
                 <div class="input-container">
-                    <button class="emoji-btn" title="Emoji">
+                    <button class="emoji-btn" title="Emoji" aria-label="Add emoji">
                         <i class="far fa-smile"></i>
                     </button>
                     <input type="text" id="messageInput" placeholder="Type your message here..." autocomplete="off">
-                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send message">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>

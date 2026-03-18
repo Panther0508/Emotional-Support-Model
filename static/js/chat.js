@@ -12,15 +12,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
 async function sendMessage(text) {
     const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
     const message = text || messageInput.value.trim();
 
     if (!message) return;
+
+    // Show loading state
+    if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
 
     // Clear input
     messageInput.value = '';
 
     // Add user message to chat
     addUserMessage(message);
+    
+    // Clear draft after sending
+    clearDraft();
 
     // Show typing indicator
     showTypingIndicator();
@@ -33,6 +43,12 @@ async function sendMessage(text) {
         });
 
         const data = await response.json();
+
+        // Reset send button
+        if (sendBtn) {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        }
 
         // Hide typing indicator
         hideTypingIndicator();
@@ -49,6 +65,11 @@ async function sendMessage(text) {
             }
         }
     } catch (error) {
+        // Reset send button
+        if (sendBtn) {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        }
         hideTypingIndicator();
         if (window.showNotification) {
             window.showNotification('An error occurred. Please try again.', 'error');
@@ -75,6 +96,36 @@ function initChat() {
 
         // Scroll to bottom
         scrollToBottom();
+        
+        // Restore draft message
+        restoreDraft();
+        
+        // Auto-save draft on input
+        messageInput.addEventListener('input', function() {
+            saveDraft(messageInput.value);
+        });
+    }
+}
+
+function saveDraft(text) {
+    if (window.Storage) {
+        window.Storage.set('chat_draft', text);
+    }
+}
+
+function restoreDraft() {
+    const messageInput = document.getElementById('messageInput');
+    if (messageInput && window.Storage) {
+        const draft = window.Storage.get('chat_draft', '');
+        if (draft) {
+            messageInput.value = draft;
+        }
+    }
+}
+
+function clearDraft() {
+    if (window.Storage) {
+        window.Storage.remove('chat_draft');
     }
 }
 
@@ -365,8 +416,33 @@ window.onclick = function (event) {
     }
 }
 
+// Close modal on Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const openModals = document.querySelectorAll('.modal.show');
+        openModals.forEach(modal => {
+            modal.classList.remove('show');
+        });
+    }
+});
+
 function refreshChat() {
     location.reload();
+}
+
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.chat-sidebar');
+    if (sidebar) {
+        sidebar.classList.toggle('mobile-open');
+    }
+}
+
+let lastFailedMessage = '';
+
+function retryLastMessage() {
+    if (lastFailedMessage) {
+        sendMessage(lastFailedMessage);
+    }
 }
 
 // Global exports if needed
@@ -380,3 +456,4 @@ window.changePersonality = changePersonality;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.refreshChat = refreshChat;
+window.toggleMobileSidebar = toggleMobileSidebar;

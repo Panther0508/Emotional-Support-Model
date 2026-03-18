@@ -22,6 +22,9 @@
 </head>
 
 <body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -68,11 +71,21 @@
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </li>
+                <li class="nav-item">
+                    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle light/dark mode">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+                </li>
                 {% else %}
                 <li class="nav-item">
                     <a href="{{ url_for('auth.login') }}" class="nav-link">
                         <i class="fas fa-sign-in-alt"></i> Login
                     </a>
+                </li>
+                <li class="nav-item">
+                    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" title="Toggle light/dark mode">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
                 </li>
                 <li class="nav-item">
                     <a href="{{ url_for('auth.register') }}" class="nav-link">
@@ -85,7 +98,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content" id="main-content" tabindex="-1">
         {% block content %}{% endblock %}
     </main>
 

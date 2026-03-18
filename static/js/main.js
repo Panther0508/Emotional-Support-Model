@@ -383,6 +383,42 @@ window.copyToClipboard = copyToClipboard;
 window.isInViewport = isInViewport;
 
 /* ==========================================================================
+   Theme Toggle
+   ========================================================================== */
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+    
+    if (window.showNotification) {
+        window.showNotification(`Switched to ${newTheme} mode`, 'info');
+    }
+}
+
+function updateThemeIcon(theme) {
+    const icons = document.querySelectorAll('#themeIcon');
+    icons.forEach(icon => {
+        icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+    });
+}
+
+window.toggleTheme = toggleTheme;
+
+// Initialize theme on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initTheme();
+});
+
+/* ==========================================================================
    Disclaimer Modal Logic
    ========================================================================== */
 window.initDisclaimer = function () {

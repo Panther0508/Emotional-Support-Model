@@ -1,96 +1,113 @@
-{% extends "base.html" %}
-
-{% block head %}
-{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block head %} {% endblock %} {% block content %}
 <div class="container py-5 animate-fade-in">
-    <div class="history-header d-flex justify-between align-center mb-5 flex-wrap gap-4">
-        <div>
-            <h1 class="neon-text mb-2">Chat History</h1>
-            <p class="text-secondary m-0">Review your past conversations and emotional journey.</p>
-        </div>
-        <div class="d-flex gap-2">
-            {% if chat_history %}
-            <button onclick="clearHistory()" class="btn btn-outline-danger btn-sm">
-                <i class="fas fa-trash-alt me-2"></i>Clear History
-            </button>
-            <button onclick="exportHistory()" class="btn btn-outline-info btn-sm">
-                <i class="fas fa-download me-2"></i>Export
-            </button>
+  <div
+    class="history-header d-flex justify-between align-center mb-5 flex-wrap gap-4"
+  >
+    <div>
+      <h1 class="neon-text mb-2">Chat History</h1>
+      <p class="text-secondary m-0">
+        Review your past conversations and emotional journey.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      {% if chat_history %}
+      <button onclick="clearHistory()" class="btn btn-outline-danger btn-sm">
+        <i class="fas fa-trash-alt me-2"></i>Clear History
+      </button>
+      <button onclick="exportHistory()" class="btn btn-outline-info btn-sm">
+        <i class="fas fa-download me-2"></i>Export
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if chat_history %}
+  <div class="message-timeline timeline">
+    {% for msg in chat_history | list | reverse %}
+    <div class="timeline-item">
+      <div class="glass-card p-4 {{ 'user-msg' if msg.user else 'bot-msg' }}">
+        <div
+          class="msg-header d-flex justify-between align-center mb-3 pb-2"
+          style="border-bottom: 1px solid var(--glass-border)"
+        >
+          <div class="msg-sender d-flex align-center gap-2 font-weight-bold">
+            {% if msg.user %}
+            <i class="fas fa-user-circle text-info"></i>
+            <span class="text-primary">You</span>
+            {% else %}
+            <i class="fas fa-robot text-primary"></i>
+            <span class="neon-text">AI Assistant</span>
             {% endif %}
+          </div>
+          <div class="msg-time small text-muted">
+            {{ msg.timestamp[:19]|replace('T', ' ') }}
+          </div>
         </div>
-    </div>
 
-    {% if chat_history %}
-    <div class="message-timeline timeline">
-        {% for msg in chat_history | reverse %}
-        <div class="timeline-item">
-            <div class="glass-card p-4 {{ 'user-msg' if msg.user else 'bot-msg' }}">
-                <div class="msg-header d-flex justify-between align-center mb-3 pb-2" style="border-bottom: 1px solid var(--glass-border);">
-                    <div class="msg-sender d-flex align-center gap-2 font-weight-bold">
-                        {% if msg.user %}
-                        <i class="fas fa-user-circle text-info"></i> <span class="text-primary">You</span>
-                        {% else %}
-                        <i class="fas fa-robot text-primary"></i> <span class="neon-text">AI Assistant</span>
-                        {% endif %}
-                    </div>
-                    <div class="msg-time small text-muted">{{ msg.timestamp[:19]|replace('T', ' ') }}</div>
-                </div>
-                
-                <div class="msg-content mb-3 text-primary" style="line-height: 1.6;">
-                    {{ msg.ai if msg.ai else msg.user }}
-                </div>
-                
-                {% if msg.emotion %}
-                <div class="emotion-badge d-inline-flex align-center gap-2 color-{{ msg.emotion }}" style="padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid currentColor; font-size: 0.8rem; background: rgba(255, 255, 255, 0.05);">
-                    {{ msg.emotion | emotion_emoji }} {{ msg.emotion | capitalize }}
-                </div>
-                {% endif %}
-            </div>
+        <div class="msg-content mb-3 text-primary" style="line-height: 1.6">
+          {{ msg.ai if msg.ai else msg.user }}
         </div>
-        {% endfor %}
+
+        {% if msg.emotion %}
+        <div
+          class="emotion-badge d-inline-flex align-center gap-2 color-{{ msg.emotion }}"
+          style="
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid currentColor;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+          "
+        >
+          {{ msg.emotion | emotion_emoji }} {{ msg.emotion | capitalize }}
+        </div>
+        {% endif %}
+      </div>
     </div>
-    {% else %}
-    <div class="empty-state glass-panel p-5 text-center">
-        <i class="fas fa-comment-slash fs-1 mb-3 text-muted"></i>
-        <h3 class="h4">No history yet</h3>
-        <p class="text-secondary mb-4">Your conversation history will appear here once you start chatting.</p>
-        <a href="{{ url_for('chat') }}" class="btn btn-primary">Start Chatting</a>
-    </div>
-    {% endif %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state glass-panel p-5 text-center">
+    <i class="fas fa-comment-slash fs-1 mb-3 text-muted"></i>
+    <h3 class="h4">No history yet</h3>
+    <p class="text-secondary mb-4">
+      Your conversation history will appear here once you start chatting.
+    </p>
+    <a href="{{ url_for('chat') }}" class="btn btn-primary">Start Chatting</a>
+  </div>
+  {% endif %}
 </div>
-{% endblock %}
-
-{% block extra_css %}{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block extra_css %}{% endblock %} {% block extra_js %}
 <script>
-    function clearHistory() {
-        if (confirm("Are you sure you want to clear your entire chat history? This cannot be undone.")) {
-            fetch('/api/history/clear', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.reload();
-                } else {
-                    alert("Error clearing history.");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                alert("Failed to clear history. Please try again.");
-            });
-        }
+  function clearHistory() {
+    if (
+      confirm(
+        "Are you sure you want to clear your entire chat history? This cannot be undone.",
+      )
+    ) {
+      fetch("/api/history/clear", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            window.location.reload();
+          } else {
+            alert("Error clearing history.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Failed to clear history. Please try again.");
+        });
     }
+  }
 
-    function exportHistory() {
-        window.location.href = '/api/export_history';
-    }
+  function exportHistory() {
+    window.location.href = "/api/export_history";
+  }
 </script>
 {% endblock %}
