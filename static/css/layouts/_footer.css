@@ -1,0 +1,57 @@
+/* ========================================
+   Footer Layout
+   ======================================== */
+
+.footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  padding: var(--space-lg) 0;
+  margin-top: auto;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 0 var(--space-md);
+}
+
+.footer p {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.footer-note {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* Main Content Wrapper */
+.main-content {
+  min-height: calc(100vh - 160px);
+  padding: var(--space-lg) 0;
+}
+
+/* Container Utility */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--space-md);
+  }
+  
+  .main-content {
+    padding: var(--space-md) 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--space-sm);
+  }
+}

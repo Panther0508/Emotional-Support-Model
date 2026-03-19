@@ -1,0 +1,216 @@
+/* ========================================
+   Avatar Components
+   ======================================== */
+
+/* Base Avatar */
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bg-primary);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.avatar i {
+  font-size: 1.25rem;
+}
+
+/* User Avatar */
+.avatar.user {
+  background: var(--accent);
+}
+
+.avatar.user i {
+  color: var(--bg-primary);
+}
+
+/* AI Avatar - Fixed Positioning */
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--accent);
+  flex-shrink: 0;
+}
+
+.message-avatar i {
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.message-avatar.user {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.message-avatar.user i {
+  color: var(--bg-primary);
+}
+
+/* AI Avatar Large (Hero) */
+.ai-avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-circle {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 0 60px var(--accent-glow),
+    0 0 100px rgba(162, 155, 254, 0.3);
+  animation: float 3s ease-in-out infinite;
+}
+
+.avatar-circle i {
+  font-size: 4rem;
+  color: #0a0e14;
+}
+
+.avatar-glow {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  z-index: -1;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-dots {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 6px;
+}
+
+.status-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: dotPulse 1.5s infinite;
+}
+
+.status-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.status-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* AI Avatar Small (Chat Header) */
+.ai-avatar-small {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ai-avatar-small i {
+  font-size: 1.25rem;
+  color: #0a0e14;
+}
+
+/* Typing Avatar */
+.typing-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.typing-avatar i {
+  font-size: 0.875rem;
+  color: var(--bg-primary);
+}
+
+/* Profile Avatar */
+.user-profile .avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 1.5rem;
+}
+
+/* Floating Animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+/* Responsive Avatars */
+@media (max-width: 768px) {
+  .avatar-circle {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .avatar-circle i {
+    font-size: 3rem;
+  }
+  
+  .avatar-glow {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .ai-avatar-small {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .ai-avatar-small i {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .avatar-circle {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .avatar-circle i {
+    font-size: 2.5rem;
+  }
+}
