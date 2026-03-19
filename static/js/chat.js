@@ -457,3 +457,7 @@ window.openModal = openModal;
 window.closeModal = closeModal;
 window.refreshChat = refreshChat;
 window.toggleMobileSidebar = toggleMobileSidebar;
+window.saveDraft = saveDraft;
+window.restoreDraft = restoreDraft;
+window.clearDraft = clearDraft;
+window.retryLastMessage = retryLastMessage;
