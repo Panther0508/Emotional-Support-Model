@@ -386,14 +386,14 @@ window.isInViewport = isInViewport;
    Theme Toggle
    ========================================================================== */
 function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeIcon(savedTheme);
 }
 
 function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
     
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
@@ -405,9 +405,9 @@ function toggleTheme() {
 }
 
 function updateThemeIcon(theme) {
-    const icons = document.querySelectorAll('#themeIcon');
+    const icons = document.querySelectorAll('.theme-icon');
     icons.forEach(icon => {
-        icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        icon.className = theme === 'dark' ? 'fas fa-moon theme-icon' : 'fas fa-sun theme-icon';
     });
 }
 

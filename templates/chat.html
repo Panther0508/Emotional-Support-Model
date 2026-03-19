@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Chat - Emotional Support AI 💛{% endblock %}
+{% block title %}Chat - Emotional Support AI 🌿{% endblock %}
 
 {% block content %}
 <div class="chat-page">
@@ -9,7 +9,7 @@
         <!-- Sidebar -->
         <aside class="chat-sidebar">
             <div class="sidebar-header">
-                <button class="mobile-close-btn" onclick="toggleMobileSidebar()" aria-label="Close sidebar" style="display: none;">
+                <button class="mobile-close-btn" onclick="toggleMobileSidebar()" aria-label="Close sidebar">
                     <i class="fas fa-times"></i>
                 </button>
                 <div class="user-profile">
@@ -106,7 +106,7 @@
         <main class="chat-main">
             <header class="chat-header">
                 <div class="chat-header-info">
-                    <button class="mobile-sidebar-toggle icon-btn d-none" onclick="toggleMobileSidebar()" aria-label="Toggle sidebar">
+                    <button class="mobile-sidebar-toggle icon-btn" onclick="toggleMobileSidebar()" aria-label="Toggle sidebar">
                         <i class="fas fa-bars"></i>
                     </button>
                     <div class="ai-avatar-small">
@@ -131,6 +131,14 @@
             <div class="messages-container" id="messagesContainer">
                 {% if chat_history %}
                 {% for message in chat_history %}
+                <div class="message user-message">
+                    <div class="message-avatar user">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">{{ message.user }}</div>
+                    </div>
+                </div>
                 <div class="message ai-message">
                     <div class="message-avatar">
                         <i class="fas fa-robot"></i>
@@ -138,17 +146,9 @@
                     <div class="message-content">
                         <div class="message-text">{{ message.ai }}</div>
                         <div class="message-meta">
-                            <span class="emotion-badge badge-{{ message.emotion }}">{{ message.emotion|emotion_emoji }} {{ message.emotion }}</span>
+                            <span class="emotion-badge {{ message.emotion }}">{{ message.emotion|emotion_emoji }} {{ message.emotion }}</span>
                             <span class="timestamp">{{ message.timestamp[:19]|replace('T', ' ') }}</span>
                         </div>
-                    </div>
-                </div>
-                <div class="message user-message">
-                    <div class="message-avatar user">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="message-content">
-                        <div class="message-text">{{ message.user }}</div>
                     </div>
                 </div>
                 {% endfor %}

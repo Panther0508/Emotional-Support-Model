@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block head %} {% endblock %} {% block content %}
+{% extends "base.html" %} {% block extra_css %}{% endblock %} {% block content %}
 <div class="container py-5 animate-fade-in">
   <div
     class="history-header d-flex justify-between align-center mb-5 flex-wrap gap-4"
@@ -77,7 +77,9 @@
   </div>
   {% endif %}
 </div>
-{% endblock %} {% block extra_css %}{% endblock %} {% block extra_js %}
+{% endblock %} 
+
+{% block extra_js %}
 <script>
   function clearHistory() {
     if (
